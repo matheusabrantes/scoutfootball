@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+backend/data_samples/api_football/*.json
+
+frontend/node_modules/
+frontend/dist/
+

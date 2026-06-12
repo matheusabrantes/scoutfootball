@@ -13,7 +13,7 @@ Every target league has a confirmed API-Football league id or a documented gap; 
 Dependencies:
 API-Football account or trial key.
 Notes:
-Partially complete as of 2026-06-12. Premier League, La Liga, and Bundesliga returned player statistics. Brasileirao Serie A and Argentina Primera Division did not return player-stat samples, so MVP acceptance failed and ingestion remains blocked.
+Complete enough to proceed as of 2026-06-12. Premier League, La Liga, Bundesliga, Brasileirao Serie A, and Argentina Primera Division returned player statistics. Brazil and Argentina work for season 2024, while 2026 and 2025 returned empty player pages.
 
 ### Validate Sportmonks coverage
 
@@ -65,7 +65,7 @@ Provider plan, endpoint, season-year, competition-id, or data-coverage cause is 
 Dependencies:
 API-Football validation result from 2026-06-12.
 Notes:
-Do not build ingestion until this blocker is resolved or the MVP acceptance rule changes.
+Resolved for MVP ingestion: both leagues return league-level player statistics for season 2024. Keep a known limitation that API-Football marks 2026 current, but 2026 and 2025 returned empty player pages.
 
 ### Create backend scaffold
 

@@ -12,9 +12,11 @@ Validation basis:
 
 - Provider: API-Football / API-SPORTS.
 - Validation date: 2026-06-12.
-- Requests used by script: 24.
-- Validated player-stat leagues: Premier League, La Liga, Bundesliga.
-- MVP acceptance: failed because Brasileirao Serie A and Argentina Primera Division returned no player-stat samples for checked seasons.
+- Initial validation requests used by script: 24.
+- South America follow-up requests used by script: 9.
+- Validated player-stat leagues: Brasileirao Serie A, Argentina Primera Division, Premier League, La Liga, Bundesliga.
+- South America season detail: Brasileirao Serie A and Argentina Primera Division returned player-stat samples for season 2024; seasons 2026 and 2025 returned no players.
+- MVP acceptance: passes if the MVP accepts latest provider-available South America player-stat seasons instead of requiring the provider current season for those leagues.
 - Sportmonks: future/backup only.
 
 ## Supported MVP Metric Set
@@ -114,11 +116,14 @@ These are safe candidates for the first real-data UI where validated league data
 
 ## MVP Decision
 
-Do not build ingestion yet. API-Football validated player statistics for Premier League, La Liga, and Bundesliga, but it did not satisfy the acceptance rule because Brasileirao Serie A and Argentina Primera Division did not return player-stat samples for the checked seasons.
+API-Football can support MVP ingestion with a provider-aware season policy:
+
+- Use league-level `/players?league={league_id}&season=2024` for Brasileirao Serie A and Argentina Primera Division.
+- Use league-level player-stat seasons validated for European leagues from the API-Football metadata.
+- Store the exact provider season per player-season row and make season availability visible in the UI.
 
 Next validation task:
 
-1. Confirm whether API-Football player statistics for Brazil and Argentina require a paid plan, different season year, different competition id, or another endpoint.
-2. Re-run validation for Brazil and Argentina only after the provider-side issue is understood.
-3. Proceed to SQLite ingestion only after Brasileirao Serie A, Argentina Primera Division, and at least three top European leagues return real player data.
-
+1. Build controlled SQLite ingestion for validated P0 leagues only.
+2. Keep request volume low and ingest one page per league first before expanding pagination.
+3. Re-test Serie A Italy and Ligue 1 with metadata-selected seasons before marking them active.

@@ -5,10 +5,12 @@ This file tracks how API-Football player fields map to ScoutFootball metrics. Th
 Validation summary:
 
 - Provider: API-Football / API-SPORTS.
-- Script requests used: 24.
-- Validated P0 player-stat leagues: Premier League, La Liga, Bundesliga.
-- Blocked P0 player-stat leagues: Brasileirao Serie A, Argentina Primera Division, Serie A Italy, Ligue 1.
-- MVP acceptance: failed because Brasileirao Serie A and Argentina Primera Division did not return player statistics samples.
+- Initial P0 validation requests used: 24.
+- South America follow-up investigation requests used: 9.
+- Validated P0 player-stat leagues: Brasileirao Serie A, Argentina Primera Division, Premier League, La Liga, Bundesliga.
+- Blocked P0 player-stat leagues from the first pass: Serie A Italy, Ligue 1.
+- South America validation detail: Brazil and Argentina player stats work at league level for season 2024; seasons 2026 and 2025 returned empty player pages.
+- MVP decision: API-Football is usable for MVP ingestion if the first South America implementation accepts the latest available player-stat season found by provider metadata, currently 2024 for both Brazil and Argentina.
 - Sportmonks remains future/backup only because it is too expensive for this early MVP.
 
 Status values:
@@ -61,6 +63,8 @@ Status values:
 The application must not present `unknown`, `requires_paid_event_data`, or `not_supported` metrics as real values. These metrics can appear in methodology and glossary views with clear unavailable or blocked states.
 
 ## Available Player Field Groups
+
+The same player field groups were confirmed for Premier League, La Liga, Bundesliga, Brasileirao Serie A, and Argentina Primera Division.
 
 Identity:
 

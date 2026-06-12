@@ -108,14 +108,50 @@ These should be marked unavailable in Phase 1 unless licensed:
 
 Recommended MVP path:
 
-1. Primary source: API-Football for the first validation pass because it appears to cover most target leagues publicly, has low-cost paid tiers, and exposes player/statistics/events endpoints. Do not commit to it until a real key validates player-stat depth, exact target league ids, cache/storage rights, and public display rights.
-2. Backup source: Sportmonks because it has strong football API positioning, player statistics, advanced statistics, and league-selection plans. It may be a better product fit if the ScoutFootball metric mapping is stronger than API-Football, but likely costs more for all 12 target leagues.
+1. Primary source: API-Football for the first validation pass because it appears to cover most target leagues publicly, has low-cost paid tiers, and exposes player/statistics/events endpoints. Initial validation on 2026-06-12 found usable player-stat samples for Premier League, La Liga, and Bundesliga, but did not satisfy MVP acceptance because Brasileirao Serie A and Argentina Primera Division returned no player-stat samples for checked seasons.
+2. Backup source: Sportmonks because it has strong football API positioning, player statistics, advanced statistics, and league-selection plans. Keep it future/backup only for now because it is too expensive for this early MVP.
 3. Metrics fully supported: basic identity, league/club/season context, minutes, goals, assists, cards, appearances, goalkeeper saves if exposed, basic shots, basic passes, basic duels, crosses, and per-90/percentage/percentile calculations derived from available totals.
 4. Metrics partially supported: xG/xA/npxG depending on paid plan/add-on, successful dribbles, key passes, long/short pass completion, aerial/defensive duel rates, possession won, forward passes, accurate crosses, and goal conversion. These require provider field mapping before committing UI labels.
 5. Metrics unavailable without paid event data: exact progressive carries, exact progressive passes under a stable definition, possession-adjusted interceptions, PSxG minus goals against, touches in box, offensive duels in a Wyscout-style taxonomy, tracking/off-ball metrics, and any provider-proprietary performance index.
 6. Recommended next validation task: create a source-validation spreadsheet or script checklist that tests API-Football and Sportmonks against the 12 target leagues, current season, last completed season, player season stats, xG/xA availability, event fields, API limits, storage/cache permissions, and public display rights. Use only mock data for frontend/backend scaffold until this is complete.
 
 Show unsupported metrics as "Unavailable" rather than approximating silently.
+
+## API-Football Validation Result: 2026-06-12
+
+Validation run:
+
+- Requests used by validation script: 24.
+- P0 leagues checked: Brasileirao Serie A, Argentina Primera Division, Premier League, La Liga, Bundesliga, Serie A Italy, Ligue 1.
+- P1/P2 leagues were not checked after P0 failed the MVP acceptance rule.
+- Safe metadata only was saved locally; no large raw provider dump is committed.
+
+| League | Priority | API-Football League ID | Seasons Checked | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Brasileirao Serie A | P0 | 71 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Argentina Primera Division | P0 | 128 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Premier League | P0 | 39 | 2025, 2024 | Validated | Player statistics sample returned. |
+| La Liga | P0 | 140 | 2025, 2024 | Validated | Player statistics sample returned. |
+| Bundesliga | P0 | 78 | 2025, 2024 | Validated | Player statistics sample returned. |
+| Serie A Italy | P0 | 135 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Ligue 1 | P0 | 61 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+
+MVP acceptance result: failed. The project should not build SQLite ingestion yet because the real-data acceptance rule requires Brasileirao Serie A, Argentina Primera Division, and at least three of the top five European leagues.
+
+Confirmed player-stat field groups from validated leagues:
+
+- Identity: player id, name, first name, last name, age, birth date/place/country, nationality, height, weight, injury status, photo.
+- Team/club: team id, name, logo.
+- League/season: league id, name, country, season, logo, flag.
+- Position: games position, rating.
+- Minutes/appearances: appearances, lineups, minutes, shirt number, captain flag.
+- Attacking: goals, assists, total shots, shots on target.
+- Passing: total passes, key passes, pass accuracy.
+- Defensive: tackles, blocks, interceptions.
+- Duels: total duels, duels won.
+- Dribbling: dribble attempts, successful dribbles, dribbled past.
+- Goalkeeper: saves, goals conceded.
+- Discipline: yellow cards, second yellow cards, red cards, penalties won/committed/scored/missed/saved.
 
 ### Phase 2: Paid Event-Data Integration
 

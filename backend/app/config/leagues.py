@@ -7,8 +7,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": None,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 South America. API-Football coverage lists Brazil Serie A; exact id must be validated.",
+        "status": "blocked",
+        "notes": "P0 South America. Validated league id 71, but API-Football returned no player statistics sample for seasons 2026 or 2025 on 2026-06-12.",
         "api_football_search_terms": ["Serie A", "Brazil"],
     },
     {
@@ -19,8 +19,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": None,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 South America. API-Football coverage lists Liga Profesional Argentina.",
+        "status": "blocked",
+        "notes": "P0 South America. Validated league id 128, but API-Football returned no player statistics sample for seasons 2026 or 2025 on 2026-06-12.",
         "api_football_search_terms": ["Liga Profesional Argentina", "Argentina"],
     },
     {
@@ -31,8 +31,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": 39,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 Europe. Common API-Football id is 39; validate current player stats.",
+        "status": "validated",
+        "notes": "P0 Europe. API-Football id 39 returned player statistics samples for season 2025 on 2026-06-12.",
         "api_football_search_terms": ["Premier League", "England"],
     },
     {
@@ -43,8 +43,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": 140,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 Europe. Common API-Football id is 140; validate current player stats.",
+        "status": "validated",
+        "notes": "P0 Europe. API-Football id 140 returned player statistics samples for season 2025 on 2026-06-12.",
         "api_football_search_terms": ["La Liga", "Spain"],
     },
     {
@@ -55,8 +55,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": 78,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 Europe. Common API-Football id is 78; validate current player stats.",
+        "status": "validated",
+        "notes": "P0 Europe. API-Football id 78 returned player statistics samples for season 2025 on 2026-06-12.",
         "api_football_search_terms": ["Bundesliga", "Germany"],
     },
     {
@@ -67,8 +67,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": 135,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 Europe. Common API-Football id is 135; validate current player stats.",
+        "status": "blocked",
+        "notes": "P0 Europe. API-Football id 135 returned no player statistics sample for seasons 2026 or 2025 on 2026-06-12.",
         "api_football_search_terms": ["Serie A", "Italy"],
     },
     {
@@ -79,8 +79,8 @@ TARGET_LEAGUES = [
         "provider_name": "api_football",
         "api_football_league_id": 61,
         "sportmonks_league_id": None,
-        "status": "needs_validation",
-        "notes": "P0 Europe. Common API-Football id is 61; validate current player stats.",
+        "status": "blocked",
+        "notes": "P0 Europe. API-Football id 61 returned no player statistics sample for seasons 2026 or 2025 on 2026-06-12.",
         "api_football_search_terms": ["Ligue 1", "France"],
     },
     {
@@ -152,4 +152,3 @@ def get_target_leagues() -> list[dict]:
 
 def get_active_leagues() -> list[dict]:
     return [league for league in TARGET_LEAGUES if league["status"] == "active"]
-

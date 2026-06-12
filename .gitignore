@@ -1,4 +1,5 @@
 .env
+.DS_Store
 .venv/
 __pycache__/
 .pytest_cache/
@@ -8,4 +9,3 @@ backend/data_samples/api_football/*.json
 
 frontend/node_modules/
 frontend/dist/
-

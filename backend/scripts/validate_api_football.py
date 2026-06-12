@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ from app.config.leagues import TARGET_LEAGUES  # noqa: E402
 
 OUTPUT_DIR = ROOT / "data_samples" / "api_football"
 REPORT_PATH = OUTPUT_DIR / "validation_report.json"
+REQUEST_COUNT = 0
 
 
 def load_dotenv_if_present() -> None:
@@ -33,6 +35,7 @@ def load_dotenv_if_present() -> None:
 
 
 def api_get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    global REQUEST_COUNT
     api_key = os.environ.get("API_FOOTBALL_KEY")
     if not api_key:
         raise RuntimeError("API_FOOTBALL_KEY is not configured.")
@@ -43,8 +46,13 @@ def api_get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         headers={"x-apisports-key": api_key},
     )
     try:
+        REQUEST_COUNT += 1
         with urlopen(request, timeout=30) as response:
-            return json.loads(response.read().decode("utf-8"))
+            payload = json.loads(response.read().decode("utf-8"))
+            delay_seconds = float(os.environ.get("API_FOOTBALL_REQUEST_DELAY_SECONDS", "7"))
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
+            return payload
     except HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"API-Football HTTP {exc.code}: {detail}") from exc
@@ -63,6 +71,53 @@ def flatten_field_paths(value: Any, prefix: str = "") -> set[str]:
         if value:
             paths.update(flatten_field_paths(value[0], prefix))
     return paths
+
+
+def group_player_field_paths(field_paths: list[str]) -> dict[str, list[str]]:
+    groups = {
+        "identity": [],
+        "team_club": [],
+        "league_season": [],
+        "position": [],
+        "minutes_appearances": [],
+        "attacking": [],
+        "passing": [],
+        "defensive": [],
+        "duels": [],
+        "dribbling": [],
+        "goalkeeper": [],
+        "discipline": [],
+        "other": [],
+    }
+    for path in field_paths:
+        if path.startswith("player."):
+            groups["identity"].append(path)
+        elif path.startswith("statistics.team"):
+            groups["team_club"].append(path)
+        elif path.startswith("statistics.league"):
+            groups["league_season"].append(path)
+        elif path in {"statistics.games.position", "statistics.games.rating"}:
+            groups["position"].append(path)
+        elif path.startswith("statistics.games"):
+            groups["minutes_appearances"].append(path)
+        elif path.startswith("statistics.goals") or path.startswith("statistics.shots"):
+            if path.endswith(".saves") or path.endswith(".conceded"):
+                groups["goalkeeper"].append(path)
+            else:
+                groups["attacking"].append(path)
+        elif path.startswith("statistics.passes"):
+            groups["passing"].append(path)
+        elif path.startswith("statistics.tackles"):
+            groups["defensive"].append(path)
+        elif path.startswith("statistics.duels"):
+            groups["duels"].append(path)
+        elif path.startswith("statistics.dribbles"):
+            groups["dribbling"].append(path)
+        elif path.startswith("statistics.cards") or path.startswith("statistics.penalty"):
+            groups["discipline"].append(path)
+        else:
+            groups["other"].append(path)
+    return {group: sorted(paths) for group, paths in groups.items() if paths}
 
 
 def select_recent_seasons(seasons: list[int]) -> list[int]:
@@ -134,6 +189,34 @@ def write_report(report: dict[str, Any]) -> None:
     REPORT_PATH.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
 
 
+def summarize_acceptance(report: dict[str, Any]) -> dict[str, Any]:
+    validated = set(report["validated_leagues"])
+    euro_p0 = {
+        "premier_league",
+        "la_liga",
+        "bundesliga",
+        "serie_a_italy",
+        "ligue_1",
+    }
+    return {
+        "brasileirao_validated": "bra_serie_a" in validated,
+        "argentina_validated": "argentina_primera" in validated,
+        "major_european_validated_count": len(validated & euro_p0),
+        "validated_major_european_leagues": sorted(validated & euro_p0),
+        "enough_to_proceed": (
+            "bra_serie_a" in validated
+            and "argentina_primera" in validated
+            and len(validated & euro_p0) >= 3
+        ),
+    }
+
+
+def refresh_report_summary(report: dict[str, Any]) -> None:
+    report["acceptance"] = summarize_acceptance(report)
+    report["player_field_groups"] = group_player_field_paths(report["player_field_paths"])
+    report["requests_used_by_script"] = REQUEST_COUNT
+
+
 def main() -> int:
     load_dotenv_if_present()
     started_at = datetime.now(timezone.utc).isoformat()
@@ -143,9 +226,11 @@ def main() -> int:
         "configured": bool(os.environ.get("API_FOOTBALL_KEY")),
         "status": None,
         "account": None,
+        "requests_used_by_script": 0,
         "validated_leagues": [],
         "league_results": [],
         "player_field_paths": [],
+        "player_field_groups": {},
         "acceptance": {
             "brasileirao_validated": False,
             "argentina_validated": False,
@@ -173,25 +258,20 @@ def main() -> int:
                     report["player_field_paths"] = sorted(
                         set(report["player_field_paths"]) | set(result["player_field_paths"])
                     )
-        validated = set(report["validated_leagues"])
-        euro_p0 = {
-            "premier_league",
-            "la_liga",
-            "bundesliga",
-            "serie_a_italy",
-            "ligue_1",
-        }
-        report["acceptance"] = {
-            "brasileirao_validated": "bra_serie_a" in validated,
-            "argentina_validated": "argentina_primera" in validated,
-            "major_european_validated_count": len(validated & euro_p0),
-            "enough_to_proceed": (
-                "bra_serie_a" in validated
-                and "argentina_primera" in validated
-                and len(validated & euro_p0) >= 3
-            ),
-        }
+            refresh_report_summary(report)
+            if priority == "P0":
+                write_report(report)
+            if priority == "P0" and league["internal_league_key"] == "ligue_1":
+                if not report["acceptance"]["enough_to_proceed"]:
+                    report["status"] = "completed_p0_acceptance_failed"
+                    refresh_report_summary(report)
+                    write_report(report)
+                    print(json.dumps(report["acceptance"], indent=2, sort_keys=True))
+                    print("P0 validation completed, but MVP acceptance did not pass.")
+                    print(f"Wrote validation report to {REPORT_PATH}")
+                    return 1
         report["status"] = "completed"
+        refresh_report_summary(report)
         write_report(report)
         print(json.dumps(report["acceptance"], indent=2, sort_keys=True))
         print("Available player field paths:")
@@ -202,6 +282,7 @@ def main() -> int:
     except Exception as exc:
         report["status"] = "failed"
         report["error"] = str(exc)
+        refresh_report_summary(report)
         write_report(report)
         print(f"Validation failed: {exc}")
         print(f"Wrote failure report to {REPORT_PATH}")

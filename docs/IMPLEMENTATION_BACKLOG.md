@@ -13,11 +13,11 @@ Every target league has a confirmed API-Football league id or a documented gap; 
 Dependencies:
 API-Football account or trial key.
 Notes:
-Do not implement real ingestion during this task.
+Partially complete as of 2026-06-12. Premier League, La Liga, and Bundesliga returned player statistics. Brasileirao Serie A and Argentina Primera Division did not return player-stat samples, so MVP acceptance failed and ingestion remains blocked.
 
 ### Validate Sportmonks coverage
 
-Priority: P0
+Priority: P2
 Area: Data
 Description:
 Validate Sportmonks against all 12 target leagues, current season, last completed season, player-stat endpoints, plan limits, xG add-on needs, public display rights, and local cache/storage permissions.
@@ -26,7 +26,7 @@ Every target league is mapped to a Sportmonks league id or documented gap; requi
 Dependencies:
 Sportmonks account, trial access, or sales confirmation.
 Notes:
-Sportmonks may be better than API-Football if field depth is stronger, but plan cost must be explicit.
+Sportmonks is future/backup only for this early MVP because it is too expensive right now.
 
 ### Map available provider fields to ScoutFootball metrics
 
@@ -39,7 +39,7 @@ Every metric in `docs/METRICS_SPEC.md` has provider field names, calculation not
 Dependencies:
 Validate API-Football coverage; validate Sportmonks coverage.
 Notes:
-This mapping decides which labels are safe to show in the MVP.
+Initial API-Football mapping is documented in `docs/PROVIDER_FIELD_MAPPING.md` and `docs/MVP_METRICS.md`. Continue with API-Football first; Sportmonks is backup only.
 
 ### Define unsupported metrics
 
@@ -53,6 +53,19 @@ Dependencies:
 Provider-field mapping.
 Notes:
 Unavailable metrics should not appear in default ranking selectors.
+
+### Resolve Brazil and Argentina player-stat blocker
+
+Priority: P0
+Area: Data
+Description:
+Determine why API-Football returned no player statistics for Brasileirao Serie A and Argentina Primera Division despite resolving league ids.
+Acceptance Criteria:
+Provider plan, endpoint, season-year, competition-id, or data-coverage cause is documented; either both leagues return player-stat samples or a replacement MVP source/league strategy is approved.
+Dependencies:
+API-Football validation result from 2026-06-12.
+Notes:
+Do not build ingestion until this blocker is resolved or the MVP acceptance rule changes.
 
 ### Create backend scaffold
 

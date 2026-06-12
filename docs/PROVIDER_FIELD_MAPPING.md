@@ -1,6 +1,15 @@
 # Provider Field Mapping
 
-This file tracks how API-Football player fields may map to ScoutFootball metrics. The mapping is intentionally conservative until the validation script confirms real fields for the target leagues and seasons.
+This file tracks how API-Football player fields map to ScoutFootball metrics. The mapping is based on the real validation run from 2026-06-12.
+
+Validation summary:
+
+- Provider: API-Football / API-SPORTS.
+- Script requests used: 24.
+- Validated P0 player-stat leagues: Premier League, La Liga, Bundesliga.
+- Blocked P0 player-stat leagues: Brasileirao Serie A, Argentina Primera Division, Serie A Italy, Ligue 1.
+- MVP acceptance: failed because Brasileirao Serie A and Argentina Primera Division did not return player statistics samples.
+- Sportmonks remains future/backup only because it is too expensive for this early MVP.
 
 Status values:
 
@@ -14,23 +23,26 @@ Status values:
 
 | ScoutFootball Metric | API-Football Candidate Fields | Status | Notes |
 | --- | --- | --- | --- |
-| Minutes | `statistics.games.minutes` | `unknown_until_provider_validation` | Required for per-90 calculations. |
-| Appearances | `statistics.games.appearences` or equivalent | `unknown_until_provider_validation` | Field spelling must be confirmed from raw provider response. |
-| Goals | `statistics.goals.total` | `unknown_until_provider_validation` | Common base attacking metric. |
-| Assists | `statistics.goals.assists` | `unknown_until_provider_validation` | Common base attacking metric. |
-| Shots | `statistics.shots.total` | `unknown_until_provider_validation` | Needed for conversion. |
-| Shots on target | `statistics.shots.on` | `unknown_until_provider_validation` | Useful attacking context. |
-| Passes | `statistics.passes.total` | `unknown_until_provider_validation` | Can support passes per 90 if present. |
-| Key passes | `statistics.passes.key` | `unknown_until_provider_validation` | Can support key passes per 90 if present. |
-| Pass accuracy | `statistics.passes.accuracy` | `unknown_until_provider_validation` | May be a string or percentage-like value. |
-| Successful dribbles | `statistics.dribbles.success` | `unknown_until_provider_validation` | Can support successful dribbles per 90 if present. |
-| Duels | `statistics.duels.total` | `unknown_until_provider_validation` | Needed for duel win percentage. |
-| Duels won | `statistics.duels.won` | `unknown_until_provider_validation` | Needed for duel win percentage. |
-| Tackles | `statistics.tackles.total` | `unknown_until_provider_validation` | Basic defensive count. |
-| Interceptions | `statistics.tackles.interceptions` | `unknown_until_provider_validation` | Raw interceptions only; not possession-adjusted. |
-| Cards | `statistics.cards.yellow`, `statistics.cards.red` | `unknown_until_provider_validation` | Context field, not a core performance metric. |
-| Saves | `statistics.goals.saves` | `unknown_until_provider_validation` | Goalkeeper metric if exposed. |
-| Goals conceded | `statistics.goals.conceded` | `unknown_until_provider_validation` | Goalkeeper/team context if exposed. |
+| Minutes | `statistics.games.minutes` | `supported` | Returned by validated player samples. Required for per-90 calculations. |
+| Appearances | `statistics.games.appearences` | `supported` | Returned by validated player samples with provider spelling `appearences`. |
+| Goals | `statistics.goals.total` | `supported` | Returned by validated player samples. |
+| Assists | `statistics.goals.assists` | `supported` | Returned by validated player samples. |
+| Shots | `statistics.shots.total` | `supported` | Returned by validated player samples. |
+| Shots on target | `statistics.shots.on` | `supported` | Returned by validated player samples. |
+| Passes | `statistics.passes.total` | `supported` | Returned by validated player samples. |
+| Key passes | `statistics.passes.key` | `supported` | Returned by validated player samples. |
+| Pass accuracy | `statistics.passes.accuracy` | `supported` | Returned by validated player samples. Must normalize string/number shape during ingestion. |
+| Successful dribbles | `statistics.dribbles.success` | `supported` | Returned by validated player samples. |
+| Dribble attempts | `statistics.dribbles.attempts` | `supported` | Returned by validated player samples. |
+| Duels | `statistics.duels.total` | `supported` | Returned by validated player samples. |
+| Duels won | `statistics.duels.won` | `supported` | Returned by validated player samples. |
+| Tackles | `statistics.tackles.total` | `supported` | Returned by validated player samples. |
+| Interceptions | `statistics.tackles.interceptions` | `supported` | Raw interceptions only; not possession-adjusted. |
+| Blocks | `statistics.tackles.blocks` | `supported` | Returned by validated player samples. |
+| Fouls committed/drawn | `statistics.fouls.committed`, `statistics.fouls.drawn` | `supported` | Returned by validated player samples. |
+| Cards | `statistics.cards.yellow`, `statistics.cards.yellowred`, `statistics.cards.red` | `supported` | Context field, not a core performance metric. |
+| Saves | `statistics.goals.saves` | `supported` | Returned by validated player samples; only meaningful for goalkeepers. |
+| Goals conceded | `statistics.goals.conceded` | `supported` | Returned by validated player samples; only meaningful for goalkeepers/defensive context. |
 | Non-penalty goals | Goal and penalty fields if available | `partially_supported` | Requires penalty-goal field; otherwise unsupported. |
 | Goal conversion % | Goals and shots | `partially_supported` | Supported only if shots and goals are present. |
 | Save percentage % | Saves and shots on target faced | `partially_supported` | API-Football may not expose shots faced at player level. |
@@ -46,5 +58,96 @@ Status values:
 
 ## Implementation Rule
 
-The application must not present `unknown_until_provider_validation`, `requires_paid_event_data`, or `not_supported` metrics as real values. These metrics can appear in methodology and glossary views with clear unavailable or blocked states.
+The application must not present `unknown`, `requires_paid_event_data`, or `not_supported` metrics as real values. These metrics can appear in methodology and glossary views with clear unavailable or blocked states.
 
+## Available Player Field Groups
+
+Identity:
+
+- `player.id`
+- `player.name`
+- `player.firstname`
+- `player.lastname`
+- `player.age`
+- `player.birth.date`
+- `player.birth.place`
+- `player.birth.country`
+- `player.nationality`
+- `player.height`
+- `player.weight`
+- `player.injured`
+- `player.photo`
+
+Team/club:
+
+- `statistics.team.id`
+- `statistics.team.name`
+- `statistics.team.logo`
+
+League/season:
+
+- `statistics.league.id`
+- `statistics.league.name`
+- `statistics.league.country`
+- `statistics.league.season`
+- `statistics.league.logo`
+- `statistics.league.flag`
+
+Position:
+
+- `statistics.games.position`
+- `statistics.games.rating`
+
+Minutes/appearances:
+
+- `statistics.games.appearences`
+- `statistics.games.lineups`
+- `statistics.games.minutes`
+- `statistics.games.number`
+- `statistics.games.captain`
+
+Attacking:
+
+- `statistics.goals.total`
+- `statistics.goals.assists`
+- `statistics.shots.total`
+- `statistics.shots.on`
+
+Passing:
+
+- `statistics.passes.total`
+- `statistics.passes.key`
+- `statistics.passes.accuracy`
+
+Defensive:
+
+- `statistics.tackles.total`
+- `statistics.tackles.blocks`
+- `statistics.tackles.interceptions`
+
+Duels:
+
+- `statistics.duels.total`
+- `statistics.duels.won`
+
+Dribbling:
+
+- `statistics.dribbles.attempts`
+- `statistics.dribbles.success`
+- `statistics.dribbles.past`
+
+Goalkeeper:
+
+- `statistics.goals.saves`
+- `statistics.goals.conceded`
+
+Discipline:
+
+- `statistics.cards.yellow`
+- `statistics.cards.yellowred`
+- `statistics.cards.red`
+- `statistics.penalty.won`
+- `statistics.penalty.commited`
+- `statistics.penalty.scored`
+- `statistics.penalty.missed`
+- `statistics.penalty.saved`

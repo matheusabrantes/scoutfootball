@@ -80,6 +80,19 @@ API-Football SQLite ingestion scaffold.
 Notes:
 Do not treat rows with all-null supported metric values as usable player analytics data.
 
+### Investigate FBref via soccerdata
+
+Priority: P0
+Area: Data
+Description:
+Install and validate `soccerdata` against FBref player stat tables for Premier League, one South American league, and then the remaining target leagues if the API is clear.
+Acceptance Criteria:
+Safe metadata is captured for available FBref tables, columns, row counts, seasons, and competitions; `docs/FBREF_FIELD_MAPPING.md` is updated from observed columns; the data strategy is classified as `fbref_first_viable`, `fbref_europe_only_viable`, `fbref_plus_api_football_viable`, `kaggle_bootstrap_required`, or `not_viable_without_paid_provider`.
+Dependencies:
+Optional `soccerdata` provider dependency.
+Notes:
+Use polite scraping, caching, and no raw data dumps. API-Football remains metadata fallback only.
+
 ### Create backend scaffold
 
 Priority: P0

@@ -117,6 +117,14 @@ Recommended MVP path:
 
 Show unsupported metrics as "Unavailable" rather than approximating silently.
 
+## Pivot Update: FBref First
+
+API-Football should remain as metadata fallback because its tested `/players` responses returned null metric values for the supported MVP metric fields. Sportmonks remains backup/future only because cost is too high for this personal early MVP.
+
+Next primary candidate: FBref via `soccerdata`.
+
+See `docs/DATA_SOURCE_PIVOT_FBREF.md` and `docs/FBREF_FIELD_MAPPING.md`.
+
 ## API-Football Validation Result: 2026-06-12
 
 Validation run:

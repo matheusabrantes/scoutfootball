@@ -6,6 +6,7 @@ __pycache__/
 .ruff_cache/
 
 backend/data_samples/api_football/*.json
+backend/data_samples/fbref/*.json
 backend/data/*.db
 backend/data/*.db-*
 

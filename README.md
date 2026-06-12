@@ -54,6 +54,25 @@ cd backend
 python3 scripts/validate_api_football.py
 ```
 
+## FBref / soccerdata Investigation
+
+`soccerdata` is optional during the provider investigation phase.
+
+Install when ready:
+
+```bash
+cd backend
+python3 -m pip install soccerdata
+```
+
+Then run:
+
+```bash
+python3 scripts/investigate_soccerdata_fbref.py
+```
+
+The script stores only safe metadata under `backend/data_samples/fbref/`, which is ignored by git.
+
 ## Ingestion
 
 Safe first run, one provider page per active league:
@@ -129,4 +148,3 @@ All active MVP leagues currently use API-Football season `2024`:
 - Bundesliga
 
 Serie A Italy and Ligue 1 remain blocked until a season/endpoint returns usable player metric values.
-

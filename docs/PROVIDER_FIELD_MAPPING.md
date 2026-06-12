@@ -62,6 +62,12 @@ Status values:
 
 The application must not present `unknown`, `requires_paid_event_data`, or `not_supported` metrics as real values. These metrics can appear in methodology and glossary views with clear unavailable or blocked states.
 
+## FBref Provider Candidate
+
+API-Football remains the metadata fallback. For analytics, ScoutFootball is investigating FBref via `soccerdata` because API-Football returned null values for the tested MVP metric fields.
+
+Detailed FBref mapping lives in `docs/FBREF_FIELD_MAPPING.md`.
+
 ## Available Player Field Groups
 
 The same player field groups were confirmed for Premier League, La Liga, Bundesliga, Brasileirao Serie A, and Argentina Primera Division.

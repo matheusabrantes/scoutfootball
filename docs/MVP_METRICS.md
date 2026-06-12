@@ -129,3 +129,14 @@ Next validation task:
 2. Confirm whether non-null player statistics require a paid plan, different endpoint, different query shape, or another validated season.
 3. Keep the SQLite ingestion scaffold, but do not treat player rows with all-null metrics as usable analytic data.
 4. Re-test Serie A Italy and Ligue 1 with metadata-selected seasons before marking them active.
+
+## FBref Pivot Status
+
+API-Football remains useful for metadata, but its tested `/players` responses returned null values for supported MVP metric fields. The next data strategy is FBref-first through `soccerdata`.
+
+Current state:
+
+- `soccerdata` is not installed in the local environment.
+- FBref field mapping has been drafted in `docs/FBREF_FIELD_MAPPING.md`.
+- Most core ScoutFootball target metrics are expected to be better covered by FBref than API-Football, especially progressive passes, progressive carries, xG/npxG/xAG, key passes, possession, misc, and keeper advanced tables.
+- Actual support remains `unknown` until the `soccerdata` investigation script can inspect table metadata.

@@ -1,4 +1,10 @@
-import type { LeagueResponse, PlayerFieldResponse, ProviderStatusResponse } from "../types/api";
+import type {
+  CompareResponse,
+  LeagueResponse,
+  MetricsResponse,
+  PlayerFieldResponse,
+  ProviderStatusResponse
+} from "../types/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -26,7 +32,10 @@ export function getRankingsMetadata(): Promise<PlayerFieldResponse> {
   return request<PlayerFieldResponse>("/api/rankings");
 }
 
-export function getCompareMetadata(): Promise<PlayerFieldResponse> {
-  return request<PlayerFieldResponse>("/api/compare");
+export function getCompareMetadata(playerIds = ""): Promise<CompareResponse> {
+  return request<CompareResponse>(`/api/compare${playerIds ? `?player_ids=${playerIds}` : ""}`);
 }
 
+export function getMetrics(): Promise<MetricsResponse> {
+  return request<MetricsResponse>("/api/metrics");
+}

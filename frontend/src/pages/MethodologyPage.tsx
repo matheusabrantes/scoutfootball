@@ -1,4 +1,15 @@
+import { useEffect, useState } from "react";
+
+import { getMetrics } from "../lib/api";
+import type { MetricsResponse } from "../types/api";
+
 export function MethodologyPage() {
+  const [metrics, setMetrics] = useState<MetricsResponse | null>(null);
+
+  useEffect(() => {
+    getMetrics().then(setMetrics).catch(() => setMetrics(null));
+  }, []);
+
   return (
     <section className="page">
       <div className="page__heading">
@@ -23,7 +34,18 @@ export function MethodologyPage() {
           <p>D3 is limited to small interface elements such as percentile bars for this phase.</p>
         </article>
       </div>
+      {metrics ? (
+        <div className="method-grid method-grid--spaced">
+          <article>
+            <h3>Supported MVP metrics</h3>
+            <p>{metrics.supported_metrics.join(", ")}</p>
+          </article>
+          <article>
+            <h3>Blocked metrics</h3>
+            <p>{metrics.blocked_metrics.join(", ")}</p>
+          </article>
+        </div>
+      ) : null}
     </section>
   );
 }
-

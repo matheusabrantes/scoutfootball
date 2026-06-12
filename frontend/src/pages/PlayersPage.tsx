@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import { StatusPanel } from "../components/StatusPanel";
-import { PercentileBar } from "../d3/PercentileBar";
 import { getPlayersMetadata } from "../lib/api";
 import type { PlayerFieldResponse } from "../types/api";
 
@@ -31,24 +30,40 @@ export function PlayersPage() {
         <StatusPanel title="Loading provider state" message="Checking backend data status." />
       ) : data.error ? (
         <StatusPanel title="Real data not configured" message={data.message ?? data.error} tone="warning" />
-      ) : (
-        <div className="data-surface">
-          <StatusPanel
-            title="Provider sample available"
-            message={data.message ?? "API-Football metadata is available."}
-            tone="success"
-          />
-          <div className="metric-grid">
-            {(data.player_field_paths ?? []).slice(0, 12).map((fieldPath, index) => (
-              <article className="metric-card" key={fieldPath}>
-                <span>{fieldPath}</span>
-                <PercentileBar value={Math.min(95, 35 + index * 5)} label={fieldPath} />
-              </article>
-            ))}
-          </div>
+      ) : data.players?.length ? (
+        <div className="table-surface">
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Team</th>
+                <th>League</th>
+                <th>Position</th>
+                <th>Minutes</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.players.map((player) => (
+                <tr key={player.player_season_stats_id}>
+                  <td>{player.name}</td>
+                  <td>{player.team_name}</td>
+                  <td>{player.league_name}</td>
+                  <td>{player.position_group}</td>
+                  <td>{player.minutes ?? "-"}</td>
+                  <td>{player.rating ?? "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      ) : (
+        <StatusPanel
+          title="No data ingested"
+          message={data.message ?? "Run the SQLite init and API-Football ingestion scripts."}
+          tone="warning"
+        />
       )}
     </section>
   );
 }
-

@@ -30,7 +30,7 @@ export function LeaguesPage() {
         {groupLeagues(data?.leagues ?? []).map((group) => (
           <section className="league-group" key={group.priority}>
             <h3>{group.priority}</h3>
-            {group.leagues.map((league) => (
+        {group.leagues.map((league) => (
               <article className="league-row" key={league.internal_league_key}>
                 <div>
                   <strong>{league.display_name}</strong>
@@ -45,4 +45,3 @@ export function LeaguesPage() {
     </section>
   );
 }
-

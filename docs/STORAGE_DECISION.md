@@ -18,6 +18,16 @@ Use local SQLite for the real-data MVP development phase, with a simple reposito
 - Store normalized league, player, player-season, and metric rows once ingestion is implemented.
 - Avoid large raw provider dumps.
 
+## Current Implementation
+
+- SQLite path is configured by `SCOUTFOOTBALL_DB_PATH`.
+- Default path is `backend/data/scoutfootball.db`.
+- `backend/scripts/init_db.py` initializes schema and configured leagues.
+- `backend/scripts/ingest_api_football_players.py --limit-pages 1` performs a safe first page-limited ingestion.
+- `backend/scripts/calculate_percentiles.py` calculates percentiles after metric values exist.
+
+Current blocker: API-Football returns player rows for active MVP leagues, but the tested free-plan responses returned null values for supported MVP metrics. The ingestion skips all-null metric rows to avoid presenting unusable analytics.
+
 ## Rules
 
 - Never commit real secrets.
@@ -34,4 +44,3 @@ When the MVP needs hosted data:
 3. Keep provider ingestion idempotent.
 4. Add ingestion run audit records.
 5. Add data freshness checks.
-

@@ -137,6 +137,8 @@ Base path: `/api`
 | `GET /api/metrics` | Metric definitions, availability, position mapping |
 | `GET /api/methodology` | Source, percentile, threshold, and approximation metadata |
 
+Current implementation note: `/api/leagues`, `/api/players`, `/api/players/{player_id}`, `/api/rankings`, `/api/compare`, and `/api/metrics` are wired to SQLite. If no usable data has been ingested, the API returns a clear "Real data has not been ingested yet" style message instead of fake data.
+
 ## Query Contract Examples
 
 ### `GET /api/players`

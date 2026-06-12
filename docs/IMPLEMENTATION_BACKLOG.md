@@ -67,6 +67,19 @@ API-Football validation result from 2026-06-12.
 Notes:
 Resolved for MVP ingestion: both leagues return league-level player statistics for season 2024. Keep a known limitation that API-Football marks 2026 current, but 2026 and 2025 returned empty player pages.
 
+### Resolve API-Football null metric values
+
+Priority: P0
+Area: Data
+Description:
+Determine why API-Football `/players` returns real player rows and statistics object fields but null values for core MVP metrics.
+Acceptance Criteria:
+At least one active MVP league returns non-null values for minutes, goals, passes, duels, or equivalent MVP metrics; otherwise document provider plan/endpoint limitations and decide whether to upgrade, use another provider, or reduce scope.
+Dependencies:
+API-Football SQLite ingestion scaffold.
+Notes:
+Do not treat rows with all-null supported metric values as usable player analytics data.
+
 ### Create backend scaffold
 
 Priority: P0

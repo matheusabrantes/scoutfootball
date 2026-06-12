@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 
 import { StatusPanel } from "../components/StatusPanel";
 import { getCompareMetadata } from "../lib/api";
-import type { PlayerFieldResponse } from "../types/api";
+import type { CompareResponse } from "../types/api";
 
 export function ComparePage() {
-  const [data, setData] = useState<PlayerFieldResponse | null>(null);
+  const [data, setData] = useState<CompareResponse | null>(null);
 
   useEffect(() => {
     getCompareMetadata().then(setData).catch((error: Error) =>
-      setData({ mock: false, error: error.message })
+      setData({ mock: false, message: error.message, players: [] })
     );
   }, []);
 
@@ -21,11 +21,10 @@ export function ComparePage() {
         <p>Comparison stays table-first. No radar charts, scatter plots, or club analysis.</p>
       </div>
       <StatusPanel
-        title={data?.error ? "Real comparison unavailable" : "Awaiting player ingestion"}
-        message={data?.message ?? data?.error ?? "Checking comparison readiness."}
-        tone={data?.error ? "warning" : "neutral"}
+        title={data?.players.length ? "Comparison ready" : "Choose players after ingestion"}
+        message={data?.message ?? "Use ?player_ids=1,2 once real players are ingested."}
+        tone={data?.players.length ? "success" : "neutral"}
       />
     </section>
   );
 }
-

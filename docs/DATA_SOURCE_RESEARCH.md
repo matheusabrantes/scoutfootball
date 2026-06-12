@@ -184,6 +184,20 @@ API-Football viability classification: `usable_for_full_mvp`.
 
 Recommendation: Proceed with API-Football MVP ingestion, but record the actual provider season used per league and do not imply that Brazil/Argentina current-season player stats are available until API-Football returns them.
 
+Additional ingestion-season finding:
+
+- Premier League, La Liga, and Bundesliga also returned player rows for season 2024 during ingestion-season verification.
+- Season 2025 returned no rows during the first ingestion attempt for those three European leagues.
+- Active MVP ingestion should therefore start with season 2024 for all five validated leagues.
+
+SQLite ingestion finding:
+
+- Page-limited ingestion confirmed the endpoint can return player rows for all five active MVP leagues.
+- The tested `/players` responses contained the expected statistics object shape, but selected metric values such as minutes, appearances, goals, passes, and duels were null.
+- Team-level fallback for Flamengo and Manchester City also returned player rows with null selected metric values.
+- The ingestion code now skips player rows where every supported MVP metric value is null.
+- API-Football remains structurally viable, but analytic ingestion is blocked until non-null player statistic values are available through plan, endpoint, query, or season validation.
+
 ### Phase 2: Paid Event-Data Integration
 
 Add a licensed provider such as Wyscout, Opta/Stats Perform, or a StatsBomb commercial feed when budget and terms are clear. This unlocks event-derived metrics, more stable definitions, and premium scouting-grade depth.

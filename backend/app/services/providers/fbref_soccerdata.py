@@ -24,7 +24,7 @@ def soccerdata_available() -> bool:
 
 
 def soccerdata_install_hint() -> str:
-    return "python3 -m pip install soccerdata"
+    return 'cd backend && . .venv/bin/activate && python -m pip install -e ".[providers]"'
 
 
 def dataframe_metadata(dataframe: Any) -> dict[str, Any]:
@@ -47,4 +47,3 @@ def dataframe_metadata(dataframe: Any) -> dict[str, Any]:
         "columns": columns,
         "sample_player_names": sample_players,
     }
-

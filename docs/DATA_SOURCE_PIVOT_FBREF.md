@@ -42,6 +42,30 @@ Rules:
 4. Use Understat via `soccerdata` only as a complement for European xG/xA.
 5. Keep API-Football for metadata fallback, league ids, teams, and identity where useful.
 
+## Investigation Result — 2026-06-12
+
+Environment:
+
+- Python environment: local `backend/.venv`.
+- Python executable: `/Users/matheus/Documents/PROJETOS/scoutfootball/backend/.venv/bin/python`.
+- `soccerdata` version: `1.8.8`.
+- Package install target: backend virtual environment only.
+
+FBref result:
+
+- `soccerdata` imports successfully.
+- FBref access preflight to `https://fbref.com/en/comps/` returned `403 Forbidden`.
+- No league tables were inspected because the script stops before broader requests when access is refused.
+- Tested target list was prepared for Premier League, La Liga, Bundesliga, Serie A Italy, Ligue 1, Brasileirao Serie A, and Argentina Primera Division, but all remain `not_tested_fbref_access_blocked`.
+- Available FBref tables and columns are therefore unknown from this environment.
+
+Decision:
+
+- Current classification: `not_viable_without_paid_provider`.
+- Do not bypass FBref access controls.
+- Keep API-Football as metadata/basic fallback.
+- For reliable advanced player metrics, use a paid/licensed provider or a vetted bootstrap dataset with documented provenance.
+
 ## Decision Framework
 
 Classify the data strategy as one of:
@@ -58,4 +82,3 @@ Decision rules:
 - If FBref/soccerdata gives Brazil and Argentina, use it for South America too.
 - If South America is missing, use API-Football for basic South America metadata only and mark advanced South America metrics as unavailable.
 - If Kaggle gives a faster top-five European bootstrap, use it only as optional seed data and document dataset source and license risk.
-

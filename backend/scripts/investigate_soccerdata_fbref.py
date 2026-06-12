@@ -18,6 +18,8 @@ from app.services.providers.fbref_soccerdata import (  # noqa: E402
 
 OUTPUT_DIR = ROOT / "data_samples" / "fbref"
 REPORT_PATH = OUTPUT_DIR / "soccerdata_fbref_investigation.json"
+SOCCERDATA_CACHE_DIR = ROOT / "data" / "soccerdata_cache"
+FBREF_COMPS_URL = "https://fbref.com/en/comps/"
 
 TARGETS = [
     {"label": "Premier League", "league": "ENG-Premier League", "season": "2024-2025"},
@@ -62,6 +64,25 @@ def try_read_table(fbref: Any, table_name: str) -> Any:
     raise AttributeError(f"No soccerdata FBref method found for table {table_name}")
 
 
+def preflight_fbref_access(fbref: Any) -> dict[str, Any]:
+    try:
+        response = fbref._session.get(FBREF_COMPS_URL)  # noqa: SLF001
+        status_code = getattr(response, "status_code", None)
+        return {
+            "ok": status_code is not None and 200 <= int(status_code) < 400,
+            "status_code": status_code,
+            "url": FBREF_COMPS_URL,
+            "error": None,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "status_code": None,
+            "url": FBREF_COMPS_URL,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
 def investigate() -> dict[str, Any]:
     report: dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -69,6 +90,7 @@ def investigate() -> dict[str, Any]:
         "soccerdata_available": soccerdata_available(),
         "install_hint": soccerdata_install_hint(),
         "targets": [],
+        "fbref_access": None,
         "strategy_classification": "unknown",
         "recommendation": None,
     }
@@ -79,6 +101,34 @@ def investigate() -> dict[str, Any]:
 
     import soccerdata as sd  # type: ignore
 
+    preflight_reader = sd.FBref(
+        leagues=[TARGETS[0]["league"]],
+        seasons=[TARGETS[0]["season"]],
+        data_dir=SOCCERDATA_CACHE_DIR,
+    )
+    report["fbref_access"] = preflight_fbref_access(preflight_reader)
+    if not report["fbref_access"]["ok"]:
+        report["status"] = "blocked_by_fbref_access"
+        report["strategy_classification"] = "not_viable_without_paid_provider"
+        report["recommendation"] = (
+            "FBref refused the soccerdata request before table inspection. "
+            "Do not bypass access controls; keep API-Football as metadata fallback "
+            "and use a paid/licensed provider or vetted bootstrap dataset for metrics."
+        )
+        for target in TARGETS:
+            report["targets"].append(
+                {
+                    **target,
+                    "status": "not_tested_fbref_access_blocked",
+                    "tables": {},
+                    "error": (
+                        f"FBref access preflight failed for {report['fbref_access']['url']} "
+                        f"with status {report['fbref_access']['status_code']}"
+                    ),
+                }
+            )
+        return report
+
     working_targets = []
     for target in TARGETS:
         target_result = {
@@ -88,7 +138,11 @@ def investigate() -> dict[str, Any]:
             "error": None,
         }
         try:
-            fbref = sd.FBref(leagues=[target["league"]], seasons=[target["season"]])
+            fbref = sd.FBref(
+                leagues=[target["league"]],
+                seasons=[target["season"]],
+                data_dir=SOCCERDATA_CACHE_DIR,
+            )
             for table_name in FBREF_TABLES:
                 try:
                     dataframe = try_read_table(fbref, table_name)
@@ -151,4 +205,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

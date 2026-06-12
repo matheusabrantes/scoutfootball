@@ -2,7 +2,7 @@
 
 Status values:
 
-- `supported`: expected direct FBref column mapping, pending local `soccerdata` verification.
+- `supported`: direct FBref column mapping was observed.
 - `partially_supported`: can be derived or approximated from FBref columns, but not identical to the ScoutFootball target definition.
 - `not_supported`: no known FBref public table mapping.
 - `requires_different_source`: requires Understat, event data, tracking, or another provider.
@@ -10,14 +10,17 @@ Status values:
 
 Investigation status:
 
-- `soccerdata` was not installed in the current environment.
+- `soccerdata 1.8.8` is installed in local `backend/.venv`.
+- Python executable: `/Users/matheus/Documents/PROJETOS/scoutfootball/backend/.venv/bin/python`.
+- FBref access preflight returned `403 Forbidden` for `https://fbref.com/en/comps/`.
 - The POC script exists at `backend/scripts/investigate_soccerdata_fbref.py`.
 - Safe metadata output path is `backend/data_samples/fbref/`.
-- Run `python3 -m pip install soccerdata` or install the `providers` extra before re-running.
+- No FBref player tables were inspected because the script stops when access is refused.
+- Run from `backend/.venv` with `python scripts/investigate_soccerdata_fbref.py`.
 
 ## Expected FBref Tables
 
-Prioritized tables:
+Prioritized tables, if FBref access becomes available through an acceptable route:
 
 - `standard`
 - `shooting`
@@ -82,8 +85,22 @@ Prioritized tables:
 
 ## Expected Coverage Strength
 
-- xG/xA/npxG: likely available for top European FBref leagues, pending `soccerdata` verification.
-- Progressive passes/carries: likely available via `PrgP` and `PrgC`, pending verification.
-- Goalkeeper PSxG: likely available through `keeper_adv`, pending verification.
-- South America: unknown until `soccerdata` and FBref league identifiers are confirmed.
+- xG/xA/npxG: likely available in some FBref top European tables, but not verified locally.
+- Progressive passes/carries: likely available via `PrgP` and `PrgC`, but not verified locally.
+- Goalkeeper PSxG: likely available through `keeper_adv`, but not verified locally.
+- South America: not verified locally.
+- Current blocker: FBref returned `403 Forbidden` before table inspection, so all FBref metric classifications remain `unknown` unless the metric explicitly requires event/vector/duel taxonomy from a different source.
 
+## Observed Table Availability
+
+| League | Season | Status | Tables Available |
+| --- | --- | --- | --- |
+| Premier League | 2024-2025 | `not_tested_fbref_access_blocked` | None observed |
+| La Liga | 2024-2025 | `not_tested_fbref_access_blocked` | None observed |
+| Bundesliga | 2024-2025 | `not_tested_fbref_access_blocked` | None observed |
+| Serie A Italy | 2024-2025 | `not_tested_fbref_access_blocked` | None observed |
+| Ligue 1 | 2024-2025 | `not_tested_fbref_access_blocked` | None observed |
+| Brasileirao Serie A | 2024 | `not_tested_fbref_access_blocked` | None observed |
+| Argentina Primera Division | 2024 | `not_tested_fbref_access_blocked` | None observed |
+
+Observed key columns: none. Table reads did not run after the access preflight returned `403`.

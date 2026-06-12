@@ -25,17 +25,26 @@ Never commit `.env`.
 
 ## Backend Setup
 
+Use a project-local backend virtual environment. Do not install backend dependencies into
+the global macOS Python environment.
+
 From the project root:
 
 ```bash
 cd backend
-python3 scripts/init_db.py
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+python scripts/init_db.py
 ```
 
 Run the API:
 
 ```bash
-python3 -m uvicorn app.main:app --reload
+cd backend
+. .venv/bin/activate
+python -m uvicorn app.main:app --reload
 ```
 
 ## API-Football Validation
@@ -56,22 +65,28 @@ python3 scripts/validate_api_football.py
 
 ## FBref / soccerdata Investigation
 
-`soccerdata` is optional during the provider investigation phase.
+`soccerdata` is optional during the provider investigation phase and must be installed
+inside `backend/.venv`.
 
 Install when ready:
 
 ```bash
 cd backend
-python3 -m pip install soccerdata
+. .venv/bin/activate
+python -m pip install -e ".[providers]"
 ```
 
 Then run:
 
 ```bash
-python3 scripts/investigate_soccerdata_fbref.py
+python scripts/investigate_soccerdata_fbref.py
 ```
 
-The script stores only safe metadata under `backend/data_samples/fbref/`, which is ignored by git.
+Investigation result from 2026-06-12: `soccerdata 1.8.8` installed successfully in
+`backend/.venv`, but FBref returned `403 Forbidden` for `https://fbref.com/en/comps/`
+before table inspection. The script now records this as a safe metadata result and does
+not continue into table retries. API-Football remains the metadata/basic fallback while
+advanced metrics require a licensed provider or vetted bootstrap dataset.
 
 ## Ingestion
 

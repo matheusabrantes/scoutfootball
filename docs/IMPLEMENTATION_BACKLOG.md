@@ -91,7 +91,7 @@ Safe metadata is captured for available FBref tables, columns, row counts, seaso
 Dependencies:
 Optional `soccerdata` provider dependency.
 Notes:
-Use polite scraping, caching, and no raw data dumps. API-Football remains metadata fallback only.
+Completed as far as allowed by access controls on 2026-06-12. `soccerdata 1.8.8` installed in local `backend/.venv`, but FBref returned `403 Forbidden` for `https://fbref.com/en/comps/` before table inspection. The script now fails fast on blocked access and records safe metadata only. Do not bypass access controls. API-Football remains metadata/basic fallback only; advanced metrics need a licensed provider or vetted bootstrap dataset.
 
 ### Create backend scaffold
 

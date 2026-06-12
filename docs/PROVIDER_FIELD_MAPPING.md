@@ -64,9 +64,18 @@ The application must not present `unknown`, `requires_paid_event_data`, or `not_
 
 ## FBref Provider Candidate
 
-API-Football remains the metadata fallback. For analytics, ScoutFootball is investigating FBref via `soccerdata` because API-Football returned null values for the tested MVP metric fields.
+API-Football remains the metadata fallback. ScoutFootball tested FBref via `soccerdata` because API-Football returned null values for the tested MVP metric fields.
 
 Detailed FBref mapping lives in `docs/FBREF_FIELD_MAPPING.md`.
+
+Current FBref result from 2026-06-12:
+
+- `soccerdata 1.8.8` installed successfully in `backend/.venv`.
+- FBref returned `403 Forbidden` for `https://fbref.com/en/comps/`.
+- No FBref tables, columns, row counts, or sample player names were available.
+- Premier League, La Liga, Bundesliga, Serie A Italy, Ligue 1, Brasileirao Serie A, and Argentina Primera Division remain unverified through FBref.
+- Strategy classification: `not_viable_without_paid_provider`.
+- API-Football should remain for metadata/basic fallback, not as the primary advanced metrics source.
 
 ## Available Player Field Groups
 

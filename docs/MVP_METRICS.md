@@ -132,11 +132,15 @@ Next validation task:
 
 ## FBref Pivot Status
 
-API-Football remains useful for metadata, but its tested `/players` responses returned null values for supported MVP metric fields. The next data strategy is FBref-first through `soccerdata`.
+API-Football remains useful for metadata, but its tested `/players` responses returned null values for supported MVP metric fields. FBref was tested through `soccerdata` in a local backend virtual environment.
 
 Current state:
 
-- `soccerdata` is not installed in the local environment.
+- `soccerdata 1.8.8` installs and imports successfully in `backend/.venv`.
+- FBref returned `403 Forbidden` for `https://fbref.com/en/comps/` before table inspection.
 - FBref field mapping has been drafted in `docs/FBREF_FIELD_MAPPING.md`.
-- Most core ScoutFootball target metrics are expected to be better covered by FBref than API-Football, especially progressive passes, progressive carries, xG/npxG/xAG, key passes, possession, misc, and keeper advanced tables.
-- Actual support remains `unknown` until the `soccerdata` investigation script can inspect table metadata.
+- Expected FBref support remains unverified for all target leagues and tables.
+- Brazil and Argentina did not reach table inspection.
+- Current strategy classification is `not_viable_without_paid_provider`.
+- API-Football should remain as metadata/basic fallback.
+- Advanced MVP metrics still require a licensed provider, a different acceptable source, or a vetted bootstrap dataset.

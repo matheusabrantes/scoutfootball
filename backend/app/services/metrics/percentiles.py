@@ -18,6 +18,12 @@ def calculate_percentiles(
     minimum_minutes: int = 500,
     minimum_peer_count: int = 5,
 ) -> dict[str, int]:
+    connection.execute(
+        """
+        UPDATE player_metric_values
+        SET percentile = NULL, peer_count = NULL, population_size = NULL, minutes_threshold = NULL
+        """
+    )
     rows = connection.execute(
         """
         SELECT

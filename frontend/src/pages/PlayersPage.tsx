@@ -61,6 +61,7 @@ export function PlayersPage() {
           <table>
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Player</th>
                 <th>Team</th>
                 <th>League</th>
@@ -72,6 +73,7 @@ export function PlayersPage() {
             <tbody>
               {data.players.map((player) => (
                 <tr key={player.player_season_stats_id}>
+                  <td>{player.id}</td>
                   <td>{player.name}</td>
                   <td>{player.team_name}</td>
                   <td>{player.league_name}</td>

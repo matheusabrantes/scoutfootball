@@ -228,7 +228,13 @@ def upsert_statsbomb_player_season(
             provider_season_id,
             1,
             METRIC_DEFINITION_VERSION,
-            json.dumps(quality_summary, sort_keys=True),
+            json.dumps(
+                {
+                    **quality_summary,
+                    "player_minutes_quality": row.get("minutes_quality"),
+                },
+                sort_keys=True,
+            ),
             datetime.now(timezone.utc).isoformat(),
         ),
     )
@@ -253,6 +259,7 @@ def metric_values(row: dict[str, Any]) -> dict[str, float | None]:
             "competition",
             "season",
             "position_group",
+            "minutes_quality",
         }:
             continue
         if isinstance(value, (int, float)) or value is None:

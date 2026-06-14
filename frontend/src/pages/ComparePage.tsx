@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 
 import { StatusPanel } from "../components/StatusPanel";
 import { getCompareMetadata } from "../lib/api";
 import type { CompareResponse } from "../types/api";
 
 export function ComparePage() {
+  const initialPlayerIds = new URLSearchParams(window.location.search).get("player_ids") ?? "";
   const [data, setData] = useState<CompareResponse | null>(null);
+  const [playerIds, setPlayerIds] = useState(initialPlayerIds);
 
   useEffect(() => {
-    getCompareMetadata().then(setData).catch((error: Error) =>
+    getCompareMetadata(initialPlayerIds).then(setData).catch((error: Error) =>
       setData({ mock: false, message: error.message, players: [] })
     );
-  }, []);
+  }, [initialPlayerIds]);
+
+  function handleCompare(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    getCompareMetadata(playerIds).then(setData).catch((error: Error) =>
+      setData({ mock: false, message: error.message, players: [] })
+    );
+  }
 
   return (
     <section className="page">
@@ -20,9 +30,19 @@ export function ComparePage() {
         <h2>Compare</h2>
         <p>Compare two to five real StatsBomb player rows in a table-first view.</p>
       </div>
+      <form className="filter-bar" onSubmit={handleCompare}>
+        <input
+          placeholder="Player IDs, e.g. 182,191"
+          value={playerIds}
+          onChange={(event) => setPlayerIds(event.target.value)}
+        />
+        <button className="primary-action" type="submit">
+          Compare Players
+        </button>
+      </form>
       <StatusPanel
         title={data?.players.length ? "Comparison ready" : "Choose players after ingestion"}
-        message={data?.message ?? "Use ?player_ids=1,2 once real players are ingested."}
+        message={data?.message ?? "Use 2 to 5 player IDs from the Players table."}
         tone={data?.players.length ? "success" : "neutral"}
       />
       {data?.players.length ? (

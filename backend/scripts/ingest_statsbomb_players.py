@@ -14,6 +14,7 @@ from app.db.connection import database_path, get_connection  # noqa: E402
 from app.db.schema import initialize_schema  # noqa: E402
 from app.services.ingestion.statsbomb_players import ingest_statsbomb_player_rows  # noqa: E402
 from app.services.metrics.statsbomb_aggregations import aggregate_player_season  # noqa: E402
+from app.services.metrics.statsbomb_aggregations import season_quality_summary  # noqa: E402
 from app.services.providers.statsbomb_open import StatsBombOpenDataProvider  # noqa: E402
 
 
@@ -48,6 +49,7 @@ def main() -> int:
         config["competition_name"],
         config["season_name"],
     )
+    diagnostics = season_quality_summary(selected_matches, events_by_match, rows)
     quality_summary = {
         "competition": config["competition_name"],
         "season": config["season_name"],
@@ -59,6 +61,8 @@ def main() -> int:
         "players_with_positions": sum(1 for row in rows if row["position_group"]),
         "players_above_900_minutes": sum(1 for row in rows if row["minutes"] and row["minutes"] >= 900),
         "minute_quality": "estimated",
+        "minute_reconciliation": diagnostics,
+        "minutes_quality_counts": diagnostics["minutes_quality_counts"],
         "metric_definition_version": "statsbomb_open_v1",
         "historical_demo": True,
         "processing_time_seconds": round(time.perf_counter() - started, 3),

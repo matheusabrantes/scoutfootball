@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import http.client
 import sys
 import time
 from pathlib import Path
@@ -41,7 +42,7 @@ def main() -> int:
     paths = provider.repository_paths()
     for index, match in enumerate(selected_matches, start=1):
         match_id = int(match["match_id"])
-        print(f"[{index}/{len(selected_matches)}] match {match_id}")
+        print(f"[{index}/{len(selected_matches)}] match {match_id}", flush=True)
         for kind, repo_path, reader in (
             ("events", f"data/events/{match_id}.json", provider.read_events),
             ("lineups", f"data/lineups/{match_id}.json", provider.read_lineups),
@@ -60,7 +61,14 @@ def main() -> int:
                 if not isinstance(payload, list):
                     raise ValueError(f"{kind} payload is not a JSON list")
                 downloaded[kind] += 1
-            except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
+            except (
+                HTTPError,
+                URLError,
+                TimeoutError,
+                ValueError,
+                json.JSONDecodeError,
+                http.client.IncompleteRead,
+            ) as exc:
                 failed.append({"match_id": match_id, "kind": kind, "error": str(exc)})
 
     summary = {
@@ -86,7 +94,7 @@ def _read_with_retry(reader, match_id: int):
     for attempt in range(3):
         try:
             return reader(match_id)
-        except (HTTPError, URLError, TimeoutError) as exc:
+        except (HTTPError, URLError, TimeoutError, http.client.IncompleteRead) as exc:
             last_error = exc
             time.sleep(0.5 * (attempt + 1))
     if last_error:

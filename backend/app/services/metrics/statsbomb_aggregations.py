@@ -25,6 +25,7 @@ OUTPUT_FIELDS = [
     "competition",
     "season",
     "position_group",
+    "minutes_quality",
     "minutes",
     "appearances",
     "starts",
@@ -150,7 +151,12 @@ def calculate_match_minutes(events: list[dict[str, Any]]) -> dict[int, dict[str,
     duration = match_duration_minutes(events)
     starters = extract_starting_positions(events)
     player_minutes: dict[int, dict[str, Any]] = {
-        player_id: {"minutes": duration, "start": True, "position": position_name}
+        player_id: {
+            "minutes": duration,
+            "start": True,
+            "position": position_name,
+            "quality": "estimated",
+        }
         for player_id, position_name in starters.items()
     }
     for event in events:
@@ -165,7 +171,12 @@ def calculate_match_minutes(events: list[dict[str, Any]]) -> dict[int, dict[str,
             player_id = int(leaving_player["id"])
             player_minutes.setdefault(
                 player_id,
-                {"minutes": duration, "start": player_id in starters, "position": position_name},
+                {
+                    "minutes": duration,
+                    "start": player_id in starters,
+                    "position": position_name,
+                    "quality": "estimated" if player_id in starters else "incomplete",
+                },
             )
             player_minutes[player_id]["minutes"] = min(
                 player_minutes[player_id]["minutes"],
@@ -177,6 +188,7 @@ def calculate_match_minutes(events: list[dict[str, Any]]) -> dict[int, dict[str,
                 "minutes": max(duration - minute, 0),
                 "start": False,
                 "position": position_name,
+                "quality": "estimated",
             }
     for event in events:
         card = event.get("bad_behaviour", {}).get("card", {}).get("name") or event.get(
@@ -186,9 +198,73 @@ def calculate_match_minutes(events: list[dict[str, Any]]) -> dict[int, dict[str,
             continue
         player_id = int(event["player"]["id"])
         minute = min(duration, int(math.floor(event_seconds(event) / 60)))
-        player_minutes.setdefault(player_id, {"minutes": duration, "start": False, "position": None})
+        player_minutes.setdefault(
+            player_id,
+            {"minutes": duration, "start": False, "position": None, "quality": "incomplete"},
+        )
         player_minutes[player_id]["minutes"] = min(player_minutes[player_id]["minutes"], minute)
+    for player_id, item in player_minutes.items():
+        if item["minutes"] < 0 or item["minutes"] > duration:
+            item["minutes"] = max(0, min(item["minutes"], duration))
+            item["quality"] = "invalid"
+        elif not item.get("position"):
+            item["quality"] = "incomplete"
     return player_minutes
+
+
+def season_quality_summary(
+    matches: list[dict[str, Any]],
+    events_by_match: dict[int, list[dict[str, Any]]],
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    diagnostics = {
+        "expected_team_player_minutes": 0,
+        "calculated_team_player_minutes": 0,
+        "absolute_difference": 0,
+        "relative_difference": 0.0,
+        "players_with_negative_minutes": 0,
+        "players_above_match_duration": 0,
+        "players_with_events_but_zero_minutes": 0,
+        "players_with_minutes_but_no_position": 0,
+        "duplicate_player_match_rows": 0,
+        "duplicate_player_team_season_rows": len(rows)
+        - len({(row.get("player_id"), row.get("provider_team_id")) for row in rows}),
+        "minutes_quality_counts": {"reliable": 0, "estimated": 0, "incomplete": 0, "invalid": 0},
+    }
+    event_player_ids = set()
+    for match in matches:
+        events = events_by_match.get(int(match["match_id"]), [])
+        duration = match_duration_minutes(events)
+        diagnostics["expected_team_player_minutes"] += duration * 22
+        minute_rows = calculate_match_minutes(events)
+        diagnostics["calculated_team_player_minutes"] += sum(item["minutes"] for item in minute_rows.values())
+        diagnostics["duplicate_player_match_rows"] += len(minute_rows) - len(set(minute_rows))
+        for event in events:
+            if event.get("player", {}).get("id"):
+                event_player_ids.add(int(event["player"]["id"]))
+        for item in minute_rows.values():
+            if item["minutes"] < 0:
+                diagnostics["players_with_negative_minutes"] += 1
+            if item["minutes"] > duration:
+                diagnostics["players_above_match_duration"] += 1
+    row_by_player = {int(row["player_id"]): row for row in rows if row.get("player_id")}
+    for player_id in event_player_ids:
+        if row_by_player.get(player_id, {}).get("minutes", 0) == 0:
+            diagnostics["players_with_events_but_zero_minutes"] += 1
+    for row in rows:
+        if row.get("minutes", 0) > 0 and not row.get("position_group"):
+            diagnostics["players_with_minutes_but_no_position"] += 1
+        quality = row.get("minutes_quality") or "incomplete"
+        diagnostics["minutes_quality_counts"][quality] = diagnostics["minutes_quality_counts"].get(quality, 0) + 1
+    diagnostics["absolute_difference"] = abs(
+        diagnostics["expected_team_player_minutes"] - diagnostics["calculated_team_player_minutes"]
+    )
+    if diagnostics["expected_team_player_minutes"]:
+        diagnostics["relative_difference"] = round(
+            diagnostics["absolute_difference"] / diagnostics["expected_team_player_minutes"],
+            4,
+        )
+    return diagnostics
 
 
 def aggregate_player_season(
@@ -211,9 +287,13 @@ def aggregate_player_season(
         minutes = calculate_match_minutes(events)
         for player_id, minute_info in minutes.items():
             row = players.setdefault(player_id, _empty_player_row(player_id, competition, season))
-            row["minutes"] += minute_info["minutes"]
+            sanitized_minutes = max(0, min(minute_info["minutes"], match_duration_minutes(events)))
+            row["minutes"] += sanitized_minutes
             row["appearances"] += 1 if minute_info["minutes"] > 0 else 0
             row["starts"] += 1 if minute_info["start"] else 0
+            minute_quality = minute_info.get("quality", "estimated")
+            if row["minutes_quality"] in {None, "incomplete"} or minute_quality == "invalid":
+                row["minutes_quality"] = minute_quality
             if minute_info.get("position") and not row["position_group"]:
                 row["position_group"] = position_group(minute_info["position"])
 
@@ -264,6 +344,7 @@ def _empty_player_row(player_id: int, competition: str, season: str) -> dict[str
             "competition": competition,
             "season": season,
             "position_group": None,
+            "minutes_quality": "incomplete",
             "pass_completion_pct": None,
             "aerial_duels": None,
             "aerial_duels_won": None,

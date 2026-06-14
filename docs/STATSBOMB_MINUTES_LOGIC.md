@@ -25,17 +25,22 @@ ScoutFootball calculates player minutes from StatsBomb Open Data events for the 
 
 The ingestion summary tracks:
 
-- `expected_team_minutes`
-- `calculated_team_minutes`
-- `minute_difference`
+- `expected_team_player_minutes`
+- `calculated_team_player_minutes`
+- `absolute_difference`
+- `relative_difference`
 - `players_with_negative_minutes`
 - `players_above_match_duration`
 - `players_with_events_but_zero_minutes`
+- `players_with_minutes_but_no_position`
+- duplicate player-match and player-team-season rows
+- `minutes_quality_counts`
 
 Current MVP status:
 
-- Premier League 2015/2016 development ingestion uses `estimated` minute quality.
-- Full public rankings should use reliable or estimated minutes only.
+- Premier League 2015/2016 full ingestion uses `estimated` minute quality for 550 rows with 0 invalid/incomplete rows.
+- Bundesliga 2023/2024 open-data sample uses `estimated` minute quality for 373 rows with 0 invalid/incomplete rows.
+- Full public rankings should use reliable or estimated minutes only and should disclose that current open-data minutes are event-derived estimates.
 - Official minutes reconciliation should be added before broader public release.
 
 ## Quality Flags
@@ -43,3 +48,4 @@ Current MVP status:
 - `reliable`: lineup, substitution, red-card, and team-minute reconciliation pass.
 - `estimated`: event-derived minutes are usable but not fully reconciled.
 - `incomplete`: missing lineup/substitution data prevents safe ranking use.
+- `invalid`: minutes exceeded the match duration or fell below zero before sanitization.

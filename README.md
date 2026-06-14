@@ -93,7 +93,7 @@ advanced metrics require a licensed provider or vetted bootstrap dataset.
 StatsBomb Open Data is the official primary source for the historical real-data MVP.
 The first release does not claim current-season coverage.
 
-Download the first development slice:
+Download the primary historical season:
 
 ```bash
 cd backend
@@ -101,16 +101,16 @@ cd backend
 python scripts/download_statsbomb_competition.py \
   --competition-id 2 \
   --season-id 27 \
-  --limit-matches 5
+  --full
 ```
 
-Build a player-season sample:
+Build player-season metrics:
 
 ```bash
 python scripts/build_statsbomb_player_season.py \
   --competition-id 2 \
   --season-id 27 \
-  --limit-matches 5
+  --full
 ```
 
 Initialize and ingest:
@@ -120,24 +120,24 @@ python scripts/init_db.py
 python scripts/ingest_statsbomb_players.py \
   --competition-id 2 \
   --season-id 27 \
-  --limit-matches 5
-python scripts/calculate_percentiles.py --minimum-minutes 300
+  --full
+python scripts/calculate_percentiles.py --minimum-minutes 900
 ```
 
-Full historical season:
+Optional recent incomplete historical sample:
 
 ```bash
 python scripts/download_statsbomb_competition.py \
-  --competition-id 2 \
-  --season-id 27 \
+  --competition-id 9 \
+  --season-id 281 \
   --full
 python scripts/build_statsbomb_player_season.py \
-  --competition-id 2 \
-  --season-id 27 \
+  --competition-id 9 \
+  --season-id 281 \
   --full
 python scripts/ingest_statsbomb_players.py \
-  --competition-id 2 \
-  --season-id 27 \
+  --competition-id 9 \
+  --season-id 281 \
   --full
 python scripts/calculate_percentiles.py --minimum-minutes 900
 ```
@@ -145,6 +145,12 @@ python scripts/calculate_percentiles.py --minimum-minutes 900
 Downloaded JSON and generated samples are stored under `backend/data_sources/`, which is
 ignored by git. If publishing any StatsBomb-based analysis, state StatsBomb as the data
 source and use their required logo attribution.
+
+Current local validation snapshot from 2026-06-14:
+
+- Premier League 2015/2016: 380/380 matches processed, 549 player-season rows ingested, 330 players above 900 minutes.
+- Bundesliga 2023/2024: 34 open-data matches processed, 372 player-season rows ingested, 17 players above 900 minutes; this is incomplete coverage and must stay labeled as such.
+- SQLite development DB after both ingestions: 914 players, 921 player-season rows, 38 teams, 77,364 metric rows, 25,227 metric rows with percentiles.
 
 ## Ingestion
 
@@ -178,7 +184,7 @@ Percentiles are grouped by league, season, position group, and metric. They are 
 ```bash
 cd frontend
 npm install
-npm run dev
+VITE_API_BASE_URL=http://127.0.0.1:8000 npm run dev
 ```
 
 Validation:
@@ -195,11 +201,14 @@ Backend:
 
 - `GET /health`
 - `GET /api/leagues`
+- `GET /api/seasons`
+- `GET /api/teams`
 - `GET /api/players`
 - `GET /api/players/{player_id}`
 - `GET /api/rankings`
 - `GET /api/compare`
 - `GET /api/metrics`
+- `GET /api/data-sources`
 
 Frontend:
 

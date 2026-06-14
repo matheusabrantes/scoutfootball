@@ -17,6 +17,15 @@ Recommended MVP architecture:
 - Visual utilities: D3.js for percentile bars and small inline distribution visuals.
 - Testing: pytest for backend, frontend typecheck/lint/build, component tests if configured.
 
+Current MVP implementation direction:
+
+- Primary metrics provider: StatsBomb Open Data.
+- MVP mode: historical real-data MVP.
+- Local cache: ignored `backend/data_sources/statsbomb_open/`.
+- Normalized storage: SQLite tables for leagues, seasons, teams, players, player-season stats, metric values, and ingestion runs.
+- API-Football: optional metadata fallback only.
+- Future providers: add through provider-neutral ingestion and metric interfaces.
+
 ## Proposed Repository Structure
 
 ```text
@@ -137,6 +146,8 @@ Base path: `/api`
 | `GET /api/metrics` | Metric definitions, availability, position mapping |
 | `GET /api/methodology` | Source, percentile, threshold, and approximation metadata |
 
+Current implementation note: `/api/leagues`, `/api/seasons`, `/api/teams`, `/api/players`, `/api/players/{player_id}`, `/api/rankings`, `/api/compare`, `/api/metrics`, and `/api/data-sources` are wired to SQLite or source metadata. If no usable data has been ingested, the API returns a clear "Real data has not been ingested yet" style message instead of fake data. Local frontend origins `http://localhost:5173` and `http://127.0.0.1:5173` are allowed by backend CORS for development.
+
 ## Query Contract Examples
 
 ### `GET /api/players`
@@ -229,6 +240,8 @@ npm run lint
 npm run typecheck
 npm run build
 ```
+
+Current frontend validation note: Node was installed locally through `nvm`; `npm audit --omit=dev` reports Vite/esbuild development-server advisories whose automated fix requires a breaking Vite major upgrade.
 
 ## Deployment Options
 

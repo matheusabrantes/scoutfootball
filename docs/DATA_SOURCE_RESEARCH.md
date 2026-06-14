@@ -2,6 +2,12 @@
 
 Research snapshot: 2026-06-12
 
+Latest deep research: `docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md` was added on 2026-06-14. It recommends a static/hybrid MVP: vetted FBref-style Kaggle/CSV datasets for top-five European advanced metrics, API-Football for metadata and South America basic context, and no live scraping or private endpoint use.
+
+StatsBomb Open Data evaluation: `docs/STATSBOMB_OPEN_DATA_EVALUATION.md` was added on 2026-06-14. After the product decision update, StatsBomb Open Data is the official primary MVP metrics provider for selected historical datasets; it is still not current-season or full target-league coverage.
+
+Product decision update: StatsBomb Open Data is now the official `primary_mvp_metrics_provider` for a `historical_real_data_mvp`. The first release accepts historical coverage and does not claim current-season availability.
+
 ## Executive Summary
 
 ScoutFootball should not ingest, scrape, mirror, or infer data from DataMB. Public inspection of DataMB shows league, club, player, radar, plot, and guide functionality, but I did not find a public statement that identifies its underlying provider. The available metric mix resembles event-data products such as Wyscout, Opta/Stats Perform, StatsBomb-style feeds, or derived FBref-style tables, but that is an inference, not a confirmed source.
@@ -108,14 +114,103 @@ These should be marked unavailable in Phase 1 unless licensed:
 
 Recommended MVP path:
 
-1. Primary source: API-Football for the first validation pass because it appears to cover most target leagues publicly, has low-cost paid tiers, and exposes player/statistics/events endpoints. Do not commit to it until a real key validates player-stat depth, exact target league ids, cache/storage rights, and public display rights.
-2. Backup source: Sportmonks because it has strong football API positioning, player statistics, advanced statistics, and league-selection plans. It may be a better product fit if the ScoutFootball metric mapping is stronger than API-Football, but likely costs more for all 12 target leagues.
+1. Primary source: API-Football for the first validation pass because it appears to cover most target leagues publicly, has low-cost paid tiers, and exposes player/statistics/events endpoints. Initial validation on 2026-06-12 found usable player-stat samples for Premier League, La Liga, and Bundesliga. A focused South America follow-up found usable league-level player-stat samples for Brasileirao Serie A and Argentina Primera Division when testing season 2024.
+2. Backup source: Sportmonks because it has strong football API positioning, player statistics, advanced statistics, and league-selection plans. Keep it future/backup only for now because it is too expensive for this early MVP.
 3. Metrics fully supported: basic identity, league/club/season context, minutes, goals, assists, cards, appearances, goalkeeper saves if exposed, basic shots, basic passes, basic duels, crosses, and per-90/percentage/percentile calculations derived from available totals.
 4. Metrics partially supported: xG/xA/npxG depending on paid plan/add-on, successful dribbles, key passes, long/short pass completion, aerial/defensive duel rates, possession won, forward passes, accurate crosses, and goal conversion. These require provider field mapping before committing UI labels.
 5. Metrics unavailable without paid event data: exact progressive carries, exact progressive passes under a stable definition, possession-adjusted interceptions, PSxG minus goals against, touches in box, offensive duels in a Wyscout-style taxonomy, tracking/off-ball metrics, and any provider-proprietary performance index.
 6. Recommended next validation task: create a source-validation spreadsheet or script checklist that tests API-Football and Sportmonks against the 12 target leagues, current season, last completed season, player season stats, xG/xA availability, event fields, API limits, storage/cache permissions, and public display rights. Use only mock data for frontend/backend scaffold until this is complete.
 
 Show unsupported metrics as "Unavailable" rather than approximating silently.
+
+## Pivot Update: FBref First
+
+API-Football should remain as metadata fallback because its tested `/players` responses returned null metric values for the supported MVP metric fields. Sportmonks remains backup/future only because cost is too high for this personal early MVP.
+
+Next primary candidate: FBref via `soccerdata`.
+
+See `docs/DATA_SOURCE_PIVOT_FBREF.md` and `docs/FBREF_FIELD_MAPPING.md`.
+
+## API-Football Validation Result: 2026-06-12
+
+Validation run:
+
+- Requests used by validation script: 24.
+- P0 leagues checked: Brasileirao Serie A, Argentina Primera Division, Premier League, La Liga, Bundesliga, Serie A Italy, Ligue 1.
+- P1/P2 leagues were not checked after P0 failed the MVP acceptance rule.
+- Safe metadata only was saved locally; no large raw provider dump is committed.
+
+| League | Priority | API-Football League ID | Seasons Checked | Result | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Brasileirao Serie A | P0 | 71 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Argentina Primera Division | P0 | 128 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Premier League | P0 | 39 | 2025, 2024 | Validated | Player statistics sample returned. |
+| La Liga | P0 | 140 | 2025, 2024 | Validated | Player statistics sample returned. |
+| Bundesliga | P0 | 78 | 2025, 2024 | Validated | Player statistics sample returned. |
+| Serie A Italy | P0 | 135 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+| Ligue 1 | P0 | 61 | 2026, 2025 | Blocked | League exists, but no player statistics sample was returned. |
+
+Initial MVP acceptance result: failed before South America season investigation because Brasileirao Serie A and Argentina Primera Division did not return 2026 or 2025 player-stat samples.
+
+Confirmed player-stat field groups from validated leagues:
+
+- Identity: player id, name, first name, last name, age, birth date/place/country, nationality, height, weight, injury status, photo.
+- Team/club: team id, name, logo.
+- League/season: league id, name, country, season, logo, flag.
+- Position: games position, rating.
+- Minutes/appearances: appearances, lineups, minutes, shirt number, captain flag.
+- Attacking: goals, assists, total shots, shots on target.
+- Passing: total passes, key passes, pass accuracy.
+- Defensive: tackles, blocks, interceptions.
+- Duels: total duels, duels won.
+- Dribbling: dribble attempts, successful dribbles, dribbled past.
+- Goalkeeper: saves, goals conceded.
+- Discipline: yellow cards, second yellow cards, red cards, penalties won/committed/scored/missed/saved.
+
+## South America API-Football Validation
+
+Follow-up investigation date: 2026-06-12.
+
+Requests used by investigation script: 9.
+
+Provider status from `/status`:
+
+- Plan: Free.
+- Subscription active: true.
+- Daily request limit: 100.
+- Requests current at status call: 24.
+
+| League | Candidate ID | Provider Name | Country | API Seasons Listed | Current Season Marked By API | Seasons Tested | League-Level Player Stats | Team-Level Fallback | Correct Working Season | Page 1 Results | Total Pages | Result |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Brasileirao Serie A | 71 | Serie A | Brazil | 2010-2026 | 2026 | 2026, 2025, 2024 | Works | Not needed | 2024 | 20 | 58 | Usable |
+| Argentina Primera Division | 128 | Liga Profesional Argentina | Argentina | 2015-2026 | 2026 | 2026, 2025, 2024 | Works | Not needed | 2024 | 20 | 85 | Usable |
+
+Finding:
+
+- The league metadata is valid for both countries.
+- API-Football marks 2026 as current for both leagues.
+- `/players?league={league_id}&season=2026` and `/players?league={league_id}&season=2025` returned no players for both leagues.
+- `/players?league={league_id}&season=2024` returned player statistics for both leagues.
+- Team-level fallback was not required because the league-level endpoint works for 2024.
+- The same player field groups were available as in validated European leagues: identity, team/club, league/season, position, minutes/appearances, attacking, passing, defensive, duels, dribbling, goalkeeper, and discipline.
+
+API-Football viability classification: `usable_for_full_mvp`.
+
+Recommendation: Proceed with API-Football MVP ingestion, but record the actual provider season used per league and do not imply that Brazil/Argentina current-season player stats are available until API-Football returns them.
+
+Additional ingestion-season finding:
+
+- Premier League, La Liga, and Bundesliga also returned player rows for season 2024 during ingestion-season verification.
+- Season 2025 returned no rows during the first ingestion attempt for those three European leagues.
+- Active MVP ingestion should therefore start with season 2024 for all five validated leagues.
+
+SQLite ingestion finding:
+
+- Page-limited ingestion confirmed the endpoint can return player rows for all five active MVP leagues.
+- The tested `/players` responses contained the expected statistics object shape, but selected metric values such as minutes, appearances, goals, passes, and duels were null.
+- Team-level fallback for Flamengo and Manchester City also returned player rows with null selected metric values.
+- The ingestion code now skips player rows where every supported MVP metric value is null.
+- API-Football remains structurally viable, but analytic ingestion is blocked until non-null player statistic values are available through plan, endpoint, query, or season validation.
 
 ### Phase 2: Paid Event-Data Integration
 

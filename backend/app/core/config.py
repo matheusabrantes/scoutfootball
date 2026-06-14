@@ -9,7 +9,14 @@ from os import getenv
 class Settings:
     api_football_key: str | None = None
     api_football_base_url: str = "https://v3.football.api-sports.io"
+    database_url: str | None = None
     scoutfootball_db_path: str = "backend/data/scoutfootball.db"
+    cors_allowed_origins: tuple[str, ...] = (
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    )
+    statsbomb_data_dir: str = "backend/data_sources/statsbomb_open"
+    scoutfootball_env: str = "development"
     sportmonks_api_key: str | None = None
     sportmonks_base_url: str | None = None
 
@@ -29,7 +36,18 @@ def get_settings() -> Settings:
         api_football_base_url=getenv(
             "API_FOOTBALL_BASE_URL", "https://v3.football.api-sports.io"
         ),
+        database_url=getenv("DATABASE_URL") or None,
         scoutfootball_db_path=getenv("SCOUTFOOTBALL_DB_PATH", "backend/data/scoutfootball.db"),
+        cors_allowed_origins=tuple(
+            origin.strip()
+            for origin in getenv(
+                "CORS_ALLOWED_ORIGINS",
+                "http://localhost:5173,http://127.0.0.1:5173",
+            ).split(",")
+            if origin.strip()
+        ),
+        statsbomb_data_dir=getenv("STATSBOMB_DATA_DIR", "backend/data_sources/statsbomb_open"),
+        scoutfootball_env=getenv("SCOUTFOOTBALL_ENV", "development"),
         sportmonks_api_key=getenv("SPORTMONKS_API_KEY") or None,
         sportmonks_base_url=getenv("SPORTMONKS_BASE_URL") or None,
     )

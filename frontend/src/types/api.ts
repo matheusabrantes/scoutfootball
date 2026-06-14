@@ -68,6 +68,19 @@ export interface PlayerFieldResponse {
   metadata?: ResponseMetadata;
 }
 
+export interface PlayerProfileResponse {
+  data_source: string;
+  mock: boolean;
+  player: PlayerRow & {
+    metrics: Array<{
+      metric_key: string;
+      metric_value: number | null;
+      percentile: number | null;
+      peer_count: number | null;
+    }>;
+  };
+}
+
 export interface PlayerRow {
   id: number;
   provider_player_id: number;

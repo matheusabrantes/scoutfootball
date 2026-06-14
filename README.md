@@ -23,6 +23,43 @@ SCOUTFOOTBALL_DB_PATH=backend/data/scoutfootball.db
 
 Never commit `.env`.
 
+
+## Environment Examples
+
+Safe examples are provided at:
+
+- `.env.example` for root-level local development.
+- `backend/.env.example` for backend-specific deployment settings.
+- `frontend/.env.example` for Vite frontend settings.
+
+Key deployment variables:
+
+```bash
+DATABASE_URL=sqlite:///backend/data/scoutfootball.db
+STATSBOMB_DATA_DIR=backend/data_sources/statsbomb_open
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+## Docker Local Setup
+
+Docker is optional for local development. It does not bake downloaded StatsBomb JSON or SQLite databases into images.
+
+```bash
+docker compose build
+docker compose up
+```
+
+Initialize data in Docker volumes when needed:
+
+```bash
+docker compose run --rm backend python scripts/download_statsbomb_competition.py --competition-id 2 --season-id 27 --full
+docker compose run --rm backend python scripts/build_statsbomb_player_season.py --competition-id 2 --season-id 27 --full
+docker compose run --rm backend python scripts/init_db.py
+docker compose run --rm backend python scripts/ingest_statsbomb_players.py --competition-id 2 --season-id 27 --full
+docker compose run --rm backend python scripts/calculate_percentiles.py --minimum-minutes 900
+```
+
 ## Backend Setup
 
 Use a project-local backend virtual environment. Do not install backend dependencies into

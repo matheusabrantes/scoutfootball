@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api/players", tags=["players"])
 @router.get("")
 def list_players(
     league: Optional[str] = None,
+    competition: Optional[str] = None,
     season: Optional[int] = None,
     team: Optional[str] = None,
     position_group: Optional[str] = None,
@@ -30,7 +31,7 @@ def list_players(
         initialize_schema(connection)
         players = list_db_players(
             connection,
-            league_key=league,
+            league_key=competition or league,
             season=season,
             team=team,
             position_group=position_group,

@@ -26,7 +26,7 @@ export function ComparePage() {
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Historical dataset</p>
+        <p className="eyebrow">Historical dataset · Data source: StatsBomb Open Data</p>
         <h2>Compare</h2>
         <p>Compare two to five real StatsBomb player rows in a table-first view.</p>
       </div>

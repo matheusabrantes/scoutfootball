@@ -8,21 +8,28 @@ import type { PlayerFieldResponse } from "../types/api";
 export function RankingsPage() {
   const [data, setData] = useState<PlayerFieldResponse | null>(null);
   const [metric, setMetric] = useState("goals");
+  const [competition, setCompetition] = useState("");
+  const [season, setSeason] = useState("");
+  const [team, setTeam] = useState("");
   const [positionGroup, setPositionGroup] = useState("");
   const [minimumMinutes, setMinimumMinutes] = useState("0");
+  const [sort, setSort] = useState("metric_value");
 
   useEffect(() => {
-    const params = new URLSearchParams({ metric, minimum_minutes: minimumMinutes });
+    const params = new URLSearchParams({ metric, minimum_minutes: minimumMinutes, sort });
+    if (competition) params.set("competition", competition);
+    if (season) params.set("season", season);
+    if (team) params.set("team", team);
     if (positionGroup) params.set("position_group", positionGroup);
     getRankingsMetadata(params.toString()).then(setData).catch((error: Error) =>
       setData({ mock: false, error: error.message })
     );
-  }, [metric, minimumMinutes, positionGroup]);
+  }, [competition, metric, minimumMinutes, positionGroup, season, sort, team]);
 
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Historical dataset</p>
+        <p className="eyebrow">Historical dataset · Data source: StatsBomb Open Data</p>
         <h2>Rankings</h2>
         <p>Rank players within the available historical StatsBomb Open Data sample.</p>
       </div>
@@ -36,6 +43,17 @@ export function RankingsPage() {
           <option value="passes_completed">Passes completed</option>
           <option value="successful_dribbles">Successful dribbles</option>
         </select>
+        <select value={competition} onChange={(event) => setCompetition(event.target.value)}>
+          <option value="">All competitions</option>
+          <option value="statsbomb_premier_league_2015_2016">Premier League 2015/2016</option>
+          <option value="statsbomb_bundesliga_2023_2024">Bundesliga 2023/2024 partial</option>
+        </select>
+        <select value={season} onChange={(event) => setSeason(event.target.value)}>
+          <option value="">All seasons</option>
+          <option value="2016">2016</option>
+          <option value="2024">2024</option>
+        </select>
+        <input placeholder="Team" value={team} onChange={(event) => setTeam(event.target.value)} />
         <select value={positionGroup} onChange={(event) => setPositionGroup(event.target.value)}>
           <option value="">All positions</option>
           <option value="Goalkeepers">Goalkeepers</option>
@@ -49,6 +67,10 @@ export function RankingsPage() {
           <option value="300">300+ minutes</option>
           <option value="500">500+ minutes</option>
           <option value="900">900+ minutes</option>
+        </select>
+        <select value={sort} onChange={(event) => setSort(event.target.value)}>
+          <option value="metric_value">Sort by raw value</option>
+          <option value="percentile">Sort by percentile</option>
         </select>
       </div>
       <StatusPanel

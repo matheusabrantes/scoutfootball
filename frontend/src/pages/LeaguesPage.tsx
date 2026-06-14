@@ -13,7 +13,7 @@ export function LeaguesPage() {
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Coverage</p>
+        <p className="eyebrow">Historical dataset · Data source: StatsBomb Open Data</p>
         <h2>Historical datasets</h2>
         <p>Available competitions depend on StatsBomb Open Data and are clearly labeled as historical.</p>
       </div>

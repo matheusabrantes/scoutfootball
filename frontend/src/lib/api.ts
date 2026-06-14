@@ -4,6 +4,7 @@ import type {
   LeagueResponse,
   MetricsResponse,
   PlayerFieldResponse,
+  PlayerProfileResponse,
   ProviderStatusResponse
 } from "../types/api";
 
@@ -31,6 +32,10 @@ export function getLeagues(): Promise<LeagueResponse> {
 
 export function getPlayersMetadata(query = ""): Promise<PlayerFieldResponse> {
   return request<PlayerFieldResponse>(`/api/players${query ? `?${query}` : ""}`);
+}
+
+export function getPlayerProfile(playerId: number): Promise<PlayerProfileResponse> {
+  return request<PlayerProfileResponse>(`/api/players/${playerId}`);
 }
 
 export function getRankingsMetadata(query = ""): Promise<PlayerFieldResponse> {

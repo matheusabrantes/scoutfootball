@@ -5,15 +5,17 @@ from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
 
+from app.core.config import get_settings
+
 
 REPO_RAW_BASE_URL = "https://raw.githubusercontent.com/statsbomb/open-data/master"
 REPO_TREE_URL = "https://api.github.com/repos/statsbomb/open-data/git/trees/master?recursive=1"
-DEFAULT_DATA_DIR = Path(__file__).resolve().parents[3] / "data_sources" / "statsbomb_open"
+DEFAULT_DATA_DIR = "backend/data_sources/statsbomb_open"
 
 
 class StatsBombOpenDataProvider:
-    def __init__(self, data_dir: Path | str = DEFAULT_DATA_DIR) -> None:
-        self.data_dir = Path(data_dir)
+    def __init__(self, data_dir: Path | str | None = None) -> None:
+        self.data_dir = _resolve_data_dir(data_dir or get_settings().statsbomb_data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
     def list_competitions(self) -> list[dict[str, Any]]:
@@ -93,3 +95,14 @@ class StatsBombOpenDataProvider:
             payload = response.read().decode("utf-8")
         cache_path.write_text(payload, encoding="utf-8")
         return json.loads(payload)
+
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[4]
+
+
+def _resolve_data_dir(data_dir: Path | str) -> Path:
+    path = Path(data_dir)
+    if path.is_absolute():
+        return path
+    return _project_root() / path

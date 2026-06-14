@@ -190,7 +190,8 @@ h3 {
 }
 
 .filter-bar input,
-.filter-bar select {
+.filter-bar select,
+.filter-bar button {
   min-height: 38px;
   min-width: 180px;
   padding: 0 10px;
@@ -199,6 +200,10 @@ h3 {
   background: #ffffff;
   color: #111827;
   font: inherit;
+}
+
+.filter-bar button {
+  min-width: auto;
 }
 
 .status-panel {
@@ -268,6 +273,22 @@ th {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.table-link {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.metric-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.4rem;
 }
 
 .metric-grid {

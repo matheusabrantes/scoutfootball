@@ -10,15 +10,13 @@ from app.api.routes.players import router as players_router
 from app.api.routes.rankings import router as rankings_router
 from app.api.routes.seasons import router as seasons_router
 from app.api.routes.teams import router as teams_router
+from app.core.config import get_settings
 
 app = FastAPI(title="ScoutFootball API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=list(get_settings().cors_allowed_origins),
     allow_credentials=False,
     allow_methods=["GET", "OPTIONS"],
     allow_headers=["*"],

@@ -13,7 +13,7 @@ export function MethodologyPage() {
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Methodology</p>
+        <p className="eyebrow">Historical dataset · Data source: StatsBomb Open Data</p>
         <h2>Data rules</h2>
         <p>
           ScoutFootball calculates metrics from StatsBomb Open Data events. Historical seasons are

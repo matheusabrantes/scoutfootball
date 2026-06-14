@@ -77,6 +77,21 @@ Current FBref result from 2026-06-12:
 - Strategy classification: `not_viable_without_paid_provider`.
 - API-Football should remain for metadata/basic fallback, not as the primary advanced metrics source.
 
+## StatsBomb Open Data Candidate
+
+Detailed evaluation lives in `docs/STATSBOMB_OPEN_DATA_EVALUATION.md`.
+
+Current StatsBomb Open Data result from 2026-06-14:
+
+- Provider classification: `viable_as_metric_engine_prototype`.
+- Selected POC: Premier League 2015/2016, competition `2`, season `27`.
+- Repository coverage for selected season: 380 matches with events and lineups.
+- POC subset processed: 3 matches, 11,041 events, 60 player-season rows.
+- Useful direct/derived fields: minutes, starts, goals, non-penalty goals, shots, shots on target, xG, npxG, assists via goal-assist passes, key passes, pass completion, progressive passes/carries under ScoutFootball definitions, crosses, dribbles, interceptions, blocks, ball recoveries, duels, cards.
+- Not available from inspected schema: direct xA, PSxG, PSxG minus goals allowed.
+- Partially derivable only: save percentage, goals conceded, goalkeeper exits, aerial duels, possession won, long/short pass accuracy.
+- StatsBomb Open Data should not replace API-Football metadata or static CSV/Kaggle strategy.
+
 ## Available Player Field Groups
 
 The same player field groups were confirmed for Premier League, La Liga, Bundesliga, Brasileirao Serie A, and Argentina Primera Division.

@@ -88,6 +88,29 @@ before table inspection. The script now records this as a safe metadata result a
 not continue into table retries. API-Football remains the metadata/basic fallback while
 advanced metrics require a licensed provider or vetted bootstrap dataset.
 
+## StatsBomb Open Data Evaluation
+
+StatsBomb Open Data is supported as a research/proof-of-concept source, not as current
+production coverage.
+
+Run the metadata and schema investigation:
+
+```bash
+cd backend
+. .venv/bin/activate
+python scripts/investigate_statsbomb_open.py
+```
+
+Build a small player-season sample from Premier League 2015/2016:
+
+```bash
+python scripts/build_statsbomb_player_season.py --competition-id 2 --season-id 27 --limit-matches 3
+```
+
+Downloaded JSON and generated samples are stored under `backend/data_sources/`, which is
+ignored by git. If publishing any StatsBomb-based analysis, state StatsBomb as the data
+source and use their required logo attribution.
+
 ## Ingestion
 
 Safe first run, one provider page per active league:

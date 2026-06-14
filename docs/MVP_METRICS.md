@@ -155,3 +155,15 @@ MVP metric strategy:
 - Brazil and Argentina: keep API-Football metadata/basic context only until a legitimate advanced dataset or paid provider is validated.
 - Do not show unsupported advanced metrics as real values.
 - Do not implement live scraping or private/unofficial endpoint ingestion.
+
+## StatsBomb Open Data Status
+
+StatsBomb Open Data was evaluated on 2026-06-14 in `docs/STATSBOMB_OPEN_DATA_EVALUATION.md`.
+
+Metric implications:
+
+- Strong for event-derived metric engine development: goals, shots, xG, npxG, passes, key passes, crosses, dribbles, interceptions, blocks, ball recoveries, duels, cards, and transparent progressive pass/carry rules.
+- Useful for a historical demo using complete target seasons such as Premier League 2015/2016.
+- Not sufficient for current-season ScoutFootball, full target-league coverage, or Brazil/Argentina advanced league metrics.
+- Does not provide PSxG or a direct xA field in the inspected open event schema.
+- Aerial duel metrics remain only partially derivable because a complete aerial-duel denominator was not proven.

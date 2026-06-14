@@ -106,6 +106,19 @@ Dependencies:
 Notes:
 Recommended next data task from 2026-06-14 deep research. Start with Kaggle top-five Europe 2024-2025 and FBref 2017-2024 datasets. Keep API-Football as metadata/basic fallback for Brazil and Argentina.
 
+### Evaluate StatsBomb historical demo ingestion
+
+Priority: P1
+Area: Data
+Description:
+Decide whether to ingest a clearly labeled StatsBomb Open Data historical demo season into SQLite after the provider-level POC.
+Acceptance Criteria:
+If approved, ingest a small or full historical season with source `statsbomb_open`, preserve StatsBomb competition/season/match IDs, include StatsBomb attribution in methodology, avoid duplicate rows, and verify API routes return real historical demo rows.
+Dependencies:
+`docs/STATSBOMB_OPEN_DATA_EVALUATION.md`, `docs/STATSBOMB_METRIC_DEFINITIONS.md`.
+Notes:
+StatsBomb Open Data is classified as `viable_as_metric_engine_prototype`, not current-season MVP coverage. Premier League 2015/2016 has 380 matches and is suitable for historical rankings if fully processed, but it should not be mixed with current-season static CSV/API-Football data without clear labeling.
+
 ### Create backend scaffold
 
 Priority: P0

@@ -4,9 +4,13 @@ Evaluation date: 2026-06-14
 
 ## Summary
 
-StatsBomb Open Data is viable as a metric-engine prototype and historical demo source, not as the first full ScoutFootball public MVP source. It provides real event-level JSON, lineups, and selected 360 files, but coverage is curated rather than comprehensive. It does not provide current-season coverage for the target league list and should not replace API-Football metadata or static CSV/Kaggle strategy.
+StatsBomb Open Data is the official primary metrics source for the first ScoutFootball MVP. The MVP is now a historical real-data MVP, not a current-season coverage product. StatsBomb Open Data provides real event-level JSON, lineups, and selected 360 files, but coverage is curated rather than comprehensive.
 
-Final classification: `viable_as_metric_engine_prototype`.
+Product classification: `primary_mvp_metrics_provider`.
+
+MVP classification: `historical_real_data_mvp`.
+
+Strategic classification: `viable_for_selected_league_mvp`.
 
 ## Repository Structure And Usage
 
@@ -264,12 +268,12 @@ Because SQLite ingestion was skipped, backend endpoints were not verified agains
 
 ## Strategic Decision
 
-- Can it power the first public MVP? No, not for current-season target-league coverage.
+- Can it power the first public MVP? Yes, if the MVP is explicitly historical.
 - Can it support current-season ScoutFootball? No.
 - Can it support the full league list? No.
 - Can its event schema help build our own metric engine? Yes.
-- Should it replace API-Football? No.
+- Should it replace API-Football? It replaces API-Football as the primary metrics provider.
 - Should API-Football remain metadata fallback? Yes.
-- Should static CSV/Kaggle remain part of the strategy? Yes.
+- Should static CSV/Kaggle remain part of the strategy? Yes, but not as the main implementation priority.
 
-Recommended role: use StatsBomb Open Data for a historical demo, metric-engine tests, event-model development, and validation of formulas that can later run against licensed event feeds. Keep API-Football for metadata and static CSV/Kaggle for broader top-five Europe player-season tables.
+Recommended role: use StatsBomb Open Data as the primary historical MVP metrics provider. Keep API-Football as optional metadata fallback and static CSV/Kaggle as a future supplement. Do not claim current-season coverage.

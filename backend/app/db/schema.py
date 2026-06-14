@@ -74,6 +74,12 @@ SCHEMA_STATEMENTS = [
         minutes INTEGER,
         rating REAL,
         raw_field_metadata TEXT,
+        provider_competition_id INTEGER,
+        provider_season_id INTEGER,
+        historical_demo INTEGER NOT NULL DEFAULT 0,
+        metric_definition_version TEXT,
+        ingestion_quality TEXT,
+        last_updated_at TEXT,
         UNIQUE(player_id, league_id, season_id, team_id),
         FOREIGN KEY (player_id) REFERENCES players(id),
         FOREIGN KEY (league_id) REFERENCES leagues(id),
@@ -89,6 +95,8 @@ SCHEMA_STATEMENTS = [
         metric_value REAL,
         percentile REAL,
         peer_count INTEGER,
+        population_size INTEGER,
+        minutes_threshold INTEGER,
         calculation_version TEXT NOT NULL DEFAULT 'mvp_v1',
         UNIQUE(player_season_stats_id, metric_key),
         FOREIGN KEY (player_season_stats_id) REFERENCES player_season_stats(id)
@@ -113,9 +121,57 @@ SCHEMA_STATEMENTS = [
     "CREATE INDEX IF NOT EXISTS idx_metric_key_value ON player_metric_values(metric_key, metric_value)",
 ]
 
+SCHEMA_MIGRATIONS = [
+    (
+        "player_season_stats",
+        "provider_competition_id",
+        "ALTER TABLE player_season_stats ADD COLUMN provider_competition_id INTEGER",
+    ),
+    (
+        "player_season_stats",
+        "provider_season_id",
+        "ALTER TABLE player_season_stats ADD COLUMN provider_season_id INTEGER",
+    ),
+    (
+        "player_season_stats",
+        "historical_demo",
+        "ALTER TABLE player_season_stats ADD COLUMN historical_demo INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "player_season_stats",
+        "metric_definition_version",
+        "ALTER TABLE player_season_stats ADD COLUMN metric_definition_version TEXT",
+    ),
+    (
+        "player_season_stats",
+        "ingestion_quality",
+        "ALTER TABLE player_season_stats ADD COLUMN ingestion_quality TEXT",
+    ),
+    (
+        "player_season_stats",
+        "last_updated_at",
+        "ALTER TABLE player_season_stats ADD COLUMN last_updated_at TEXT",
+    ),
+    (
+        "player_metric_values",
+        "population_size",
+        "ALTER TABLE player_metric_values ADD COLUMN population_size INTEGER",
+    ),
+    (
+        "player_metric_values",
+        "minutes_threshold",
+        "ALTER TABLE player_metric_values ADD COLUMN minutes_threshold INTEGER",
+    ),
+]
+
 
 def initialize_schema(connection: Connection) -> None:
     for statement in SCHEMA_STATEMENTS:
         connection.execute(statement)
+    for table_name, column_name, statement in SCHEMA_MIGRATIONS:
+        existing_columns = {
+            row["name"] for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+        }
+        if column_name not in existing_columns:
+            connection.execute(statement)
     connection.commit()
-

@@ -22,6 +22,7 @@ def main() -> int:
     parser.add_argument("--competition-id", type=int, default=2)
     parser.add_argument("--season-id", type=int, default=27)
     parser.add_argument("--limit-matches", type=int, default=3)
+    parser.add_argument("--full", action="store_true")
     args = parser.parse_args()
 
     started = time.perf_counter()
@@ -33,7 +34,7 @@ def main() -> int:
         if item["competition_id"] == args.competition_id and item["season_id"] == args.season_id
     )
     all_matches = provider.list_matches(args.competition_id, args.season_id)
-    selected_matches = all_matches[: args.limit_matches]
+    selected_matches = all_matches if args.full else all_matches[: args.limit_matches]
     events_by_match = {
         int(match["match_id"]): provider.read_events(int(match["match_id"]))
         for match in selected_matches

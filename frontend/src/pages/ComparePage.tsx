@@ -16,15 +16,45 @@ export function ComparePage() {
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Two to five players</p>
+        <p className="eyebrow">Historical dataset</p>
         <h2>Compare</h2>
-        <p>Comparison stays table-first. No radar charts, scatter plots, or club analysis.</p>
+        <p>Compare two to five real StatsBomb player rows in a table-first view.</p>
       </div>
       <StatusPanel
         title={data?.players.length ? "Comparison ready" : "Choose players after ingestion"}
         message={data?.message ?? "Use ?player_ids=1,2 once real players are ingested."}
         tone={data?.players.length ? "success" : "neutral"}
       />
+      {data?.players.length ? (
+        <div className="table-surface table-surface--spaced">
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Team</th>
+                <th>Competition</th>
+                <th>Season</th>
+                <th>Goals</th>
+                <th>xG</th>
+                <th>Progressive passes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.players.map((player) => (
+                <tr key={player.id}>
+                  <td>{player.name}</td>
+                  <td>{player.team_name}</td>
+                  <td>{player.league_name}</td>
+                  <td>{player.season}</td>
+                  <td>{player.metrics.goals?.value ?? "-"}</td>
+                  <td>{player.metrics.xg?.value ?? "-"}</td>
+                  <td>{player.metrics.progressive_passes?.value ?? "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </section>
   );
 }

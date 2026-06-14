@@ -161,6 +161,8 @@ def list_players(
     team: str | None = None,
     position_group: str | None = None,
     nationality: str | None = None,
+    search: str | None = None,
+    age: int | None = None,
     minimum_minutes: int = 0,
     limit: int = 100,
     offset: int = 0,
@@ -182,6 +184,12 @@ def list_players(
     if nationality:
         filters.append("players.nationality = ?")
         params.append(nationality)
+    if search:
+        filters.append("players.name LIKE ?")
+        params.append(f"%{search}%")
+    if age:
+        filters.append("players.age = ?")
+        params.append(age)
     params.extend([limit, offset])
     rows = connection.execute(
         f"""
@@ -201,7 +209,13 @@ def list_players(
             player_season_stats.appearances,
             player_season_stats.starts,
             player_season_stats.minutes,
-            player_season_stats.rating
+            player_season_stats.rating,
+            player_season_stats.provider,
+            player_season_stats.provider_competition_id,
+            player_season_stats.provider_season_id,
+            player_season_stats.historical_demo,
+            player_season_stats.metric_definition_version,
+            player_season_stats.last_updated_at
         FROM player_season_stats
         JOIN players ON players.id = player_season_stats.player_id
         JOIN teams ON teams.id = player_season_stats.team_id
@@ -253,4 +267,3 @@ def _flatten_field_paths(value: Any, prefix: str = "") -> set[str]:
     elif isinstance(value, list) and value:
         paths.update(_flatten_field_paths(value[0], prefix))
     return paths
-

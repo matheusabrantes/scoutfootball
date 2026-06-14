@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from fastapi import APIRouter, HTTPException, Query
 
 from app.core.config import get_settings
@@ -10,12 +14,14 @@ router = APIRouter(prefix="/api/players", tags=["players"])
 
 @router.get("")
 def list_players(
-    league: str | None = None,
-    season: int | None = None,
-    team: str | None = None,
-    position_group: str | None = None,
+    league: Optional[str] = None,
+    season: Optional[int] = None,
+    team: Optional[str] = None,
+    position_group: Optional[str] = None,
     minimum_minutes: int = 0,
-    nationality: str | None = None,
+    nationality: Optional[str] = None,
+    search: Optional[str] = None,
+    age: Optional[int] = None,
     limit: int = Query(default=100, le=500),
     offset: int = 0,
 ) -> dict:
@@ -29,6 +35,8 @@ def list_players(
             team=team,
             position_group=position_group,
             nationality=nationality,
+            search=search,
+            age=age,
             minimum_minutes=minimum_minutes,
             limit=limit,
             offset=offset,
@@ -39,6 +47,22 @@ def list_players(
             "mock": False,
             "players": players,
             "count": len(players),
+            "metadata": {
+                "source": "statsbomb_open",
+                "historical_demo": any(player.get("historical_demo") for player in players),
+                "metric_definition_version": next(
+                    (
+                        player.get("metric_definition_version")
+                        for player in players
+                        if player.get("metric_definition_version")
+                    ),
+                    None,
+                ),
+                "last_updated_at": next(
+                    (player.get("last_updated_at") for player in players if player.get("last_updated_at")),
+                    None,
+                ),
+            },
         }
     return {
         "data_source": "sqlite",

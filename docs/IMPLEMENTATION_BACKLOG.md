@@ -1,5 +1,9 @@
 # ScoutFootball Implementation Backlog
 
+## MVP Direction Update
+
+The active MVP is a historical real-data product powered primarily by StatsBomb Open Data. API-Football remains optional metadata fallback; static CSV/Kaggle remains supplemental.
+
 ## Phase 0 — Data Validation and Scaffold
 
 ### Validate API-Football coverage

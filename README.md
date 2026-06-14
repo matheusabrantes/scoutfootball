@@ -1,12 +1,12 @@
 # ScoutFootball
 
-ScoutFootball is a free web-only football player analytics platform focused on selected leagues, real provider data, and clear player-level metrics.
+ScoutFootball is a free web-only football player analytics platform focused on historical real event data and clear player-level metrics.
 
 ## Stack
 
 - Backend: Python, FastAPI, SQLite for MVP development.
-- Data provider: API-Football / API-SPORTS as primary.
-- Future backup provider: Sportmonks.
+- Primary MVP metrics provider: StatsBomb Open Data.
+- Optional metadata fallback: API-Football / API-SPORTS.
 - Frontend: React, Vite, TypeScript, D3 for small percentile visuals.
 
 ## Environment
@@ -90,21 +90,56 @@ advanced metrics require a licensed provider or vetted bootstrap dataset.
 
 ## StatsBomb Open Data Evaluation
 
-StatsBomb Open Data is supported as a research/proof-of-concept source, not as current
-production coverage.
+StatsBomb Open Data is the official primary source for the historical real-data MVP.
+The first release does not claim current-season coverage.
 
-Run the metadata and schema investigation:
+Download the first development slice:
 
 ```bash
 cd backend
 . .venv/bin/activate
-python scripts/investigate_statsbomb_open.py
+python scripts/download_statsbomb_competition.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --limit-matches 5
 ```
 
-Build a small player-season sample from Premier League 2015/2016:
+Build a player-season sample:
 
 ```bash
-python scripts/build_statsbomb_player_season.py --competition-id 2 --season-id 27 --limit-matches 3
+python scripts/build_statsbomb_player_season.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --limit-matches 5
+```
+
+Initialize and ingest:
+
+```bash
+python scripts/init_db.py
+python scripts/ingest_statsbomb_players.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --limit-matches 5
+python scripts/calculate_percentiles.py --minimum-minutes 300
+```
+
+Full historical season:
+
+```bash
+python scripts/download_statsbomb_competition.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --full
+python scripts/build_statsbomb_player_season.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --full
+python scripts/ingest_statsbomb_players.py \
+  --competition-id 2 \
+  --season-id 27 \
+  --full
+python scripts/calculate_percentiles.py --minimum-minutes 900
 ```
 
 Downloaded JSON and generated samples are stored under `backend/data_sources/`, which is

@@ -17,6 +17,15 @@ Recommended MVP architecture:
 - Visual utilities: D3.js for percentile bars and small inline distribution visuals.
 - Testing: pytest for backend, frontend typecheck/lint/build, component tests if configured.
 
+Current MVP implementation direction:
+
+- Primary metrics provider: StatsBomb Open Data.
+- MVP mode: historical real-data MVP.
+- Local cache: ignored `backend/data_sources/statsbomb_open/`.
+- Normalized storage: SQLite tables for leagues, seasons, teams, players, player-season stats, metric values, and ingestion runs.
+- API-Football: optional metadata fallback only.
+- Future providers: add through provider-neutral ingestion and metric interfaces.
+
 ## Proposed Repository Structure
 
 ```text

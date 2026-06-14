@@ -160,6 +160,8 @@ MVP metric strategy:
 
 StatsBomb Open Data was evaluated on 2026-06-14 in `docs/STATSBOMB_OPEN_DATA_EVALUATION.md`.
 
+Product decision: StatsBomb Open Data is now the primary MVP metrics provider for historical real data.
+
 Metric implications:
 
 - Strong for event-derived metric engine development: goals, shots, xG, npxG, passes, key passes, crosses, dribbles, interceptions, blocks, ball recoveries, duels, cards, and transparent progressive pass/carry rules.

@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from app.services.metrics.position_mapping import map_statsbomb_position
+
 
 PITCH_LENGTH = 120.0
 PITCH_WIDTH = 80.0
@@ -18,6 +20,7 @@ MINIMUM_CARRY_DISTANCE = 5.0
 OUTPUT_FIELDS = [
     "player_id",
     "player_name",
+    "provider_team_id",
     "team",
     "competition",
     "season",
@@ -36,10 +39,14 @@ OUTPUT_FIELDS = [
     "passes_attempted",
     "passes_completed",
     "pass_completion_pct",
+    "forward_passes_attempted",
+    "forward_passes_completed",
+    "forward_pass_completion_pct",
     "progressive_passes",
     "progressive_carries",
     "crosses",
     "accurate_crosses",
+    "dribbles_attempted",
     "successful_dribbles",
     "touches_in_box",
     "interceptions",
@@ -50,33 +57,23 @@ OUTPUT_FIELDS = [
     "aerial_duels",
     "aerial_duels_won",
     "saves",
+    "shots_on_target_faced",
+    "save_percentage",
     "goals_conceded",
+    "long_passes_attempted",
+    "long_passes_completed",
+    "long_pass_accuracy",
+    "short_passes_attempted",
+    "short_passes_completed",
+    "short_pass_completion",
+    "exits",
     "yellow_cards",
     "red_cards",
 ]
 
 
 def position_group(position_name: str | None) -> str | None:
-    if not position_name:
-        return None
-    position = position_name.lower()
-    if "goalkeeper" in position:
-        return "Goalkeepers"
-    if "center back" in position or "centre back" in position:
-        return "Centrebacks"
-    if "left back" in position or "right back" in position or "wing back" in position:
-        return "Fullbacks"
-    if "midfield" in position:
-        return "Midfielders"
-    if (
-        "wing" in position
-        or "striker" in position
-        or "forward" in position
-        or "center forward" in position
-        or "centre forward" in position
-    ):
-        return "Attackers"
-    return "Midfielders"
+    return map_statsbomb_position(position_name)
 
 
 def distance_to_goal(location: list[float] | tuple[float, ...] | None) -> float | None:
@@ -229,6 +226,7 @@ def aggregate_player_season(
             row["player_name"] = player.get("name") or row["player_name"]
             team_id = event.get("team", {}).get("id")
             if team_id:
+                row["provider_team_id"] = team_id
                 row["team"] = team_by_match.get(match_id, {}).get(team_id, event.get("team", {}).get("name"))
             if event.get("position", {}).get("name") and not row["position_group"]:
                 row["position_group"] = position_group(event["position"]["name"])
@@ -237,6 +235,16 @@ def aggregate_player_season(
     rows = []
     for row in players.values():
         row["pass_completion_pct"] = _pct(row["passes_completed"], row["passes_attempted"])
+        row["forward_pass_completion_pct"] = _pct(
+            row["forward_passes_completed"],
+            row["forward_passes_attempted"],
+        )
+        row["save_percentage"] = _pct(row["saves"], row["shots_on_target_faced"])
+        row["long_pass_accuracy"] = _pct(row["long_passes_completed"], row["long_passes_attempted"])
+        row["short_pass_completion"] = _pct(
+            row["short_passes_completed"],
+            row["short_passes_attempted"],
+        )
         for field in ("xg", "npxg"):
             row[field] = round(row[field], 4)
         for unavailable in ("aerial_duels", "aerial_duels_won"):
@@ -251,6 +259,7 @@ def _empty_player_row(player_id: int, competition: str, season: str) -> dict[str
         {
             "player_id": player_id,
             "player_name": None,
+            "provider_team_id": None,
             "team": None,
             "competition": competition,
             "season": season,
@@ -271,9 +280,23 @@ def _apply_event(row: dict[str, Any], event: dict[str, Any]) -> None:
     if event_type == "Pass":
         pass_data = event.get("pass", {})
         outcome = pass_data.get("outcome", {}).get("name")
+        pass_length = float(pass_data.get("length") or 0.0)
         row["passes_attempted"] += 1
         if outcome is None:
             row["passes_completed"] += 1
+        if pass_data.get("end_location") and location:
+            if float(pass_data["end_location"][0]) > float(location[0]):
+                row["forward_passes_attempted"] += 1
+                if outcome is None:
+                    row["forward_passes_completed"] += 1
+        if pass_length >= 30.0:
+            row["long_passes_attempted"] += 1
+            if outcome is None:
+                row["long_passes_completed"] += 1
+        elif pass_length > 0:
+            row["short_passes_attempted"] += 1
+            if outcome is None:
+                row["short_passes_completed"] += 1
         if pass_data.get("shot_assist"):
             row["key_passes"] += 1
         if pass_data.get("goal_assist"):
@@ -305,6 +328,7 @@ def _apply_event(row: dict[str, Any], event: dict[str, Any]) -> None:
             if shot.get("type", {}).get("name") != "Penalty":
                 row["non_penalty_goals"] += 1
     elif event_type == "Dribble":
+        row["dribbles_attempted"] += 1
         if event.get("dribble", {}).get("outcome", {}).get("name") == "Complete":
             row["successful_dribbles"] += 1
     elif event_type == "Interception":
@@ -329,10 +353,15 @@ def _apply_event(row: dict[str, Any], event: dict[str, Any]) -> None:
     elif event_type == "Goal Keeper":
         goalkeeper = event.get("goalkeeper", {})
         outcome = goalkeeper.get("outcome", {}).get("name")
+        goalkeeper_type = goalkeeper.get("type", {}).get("name")
+        if goalkeeper_type in {"Shot Faced", "Save"}:
+            row["shots_on_target_faced"] += 1
         if outcome in {"Saved", "Saved Twice", "Success", "In Play Safe"}:
             row["saves"] += 1
-        if goalkeeper.get("type", {}).get("name") == "Shot Faced" and outcome == "Goal Conceded":
+        if goalkeeper_type == "Shot Faced" and outcome == "Goal Conceded":
             row["goals_conceded"] += 1
+        if goalkeeper_type in {"Collected", "Keeper Sweeper", "Punch"}:
+            row["exits"] += 1
 
     card = event.get("bad_behaviour", {}).get("card", {}).get("name") or event.get(
         "foul_committed", {}

@@ -2,6 +2,8 @@
 
 Research date: 2026-06-14
 
+Product decision update: ScoutFootball will proceed with StatsBomb Open Data as the official `primary_mvp_metrics_provider` for a `historical_real_data_mvp`. Kaggle/static CSV remains a supplement, not the main implementation priority.
+
 ## Executive Summary
 
 The most realistic low-cost ScoutFootball path is a static/hybrid MVP: use vetted FBref-style Kaggle CSVs for top-five European league advanced metrics, API-Football only for identity/league/team metadata and South America basic context, and manually uploaded CSVs for Brazil/Argentina advanced metrics until a licensed data provider is affordable.

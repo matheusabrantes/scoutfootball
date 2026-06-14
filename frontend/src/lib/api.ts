@@ -1,5 +1,6 @@
 import type {
   CompareResponse,
+  DataSourcesResponse,
   LeagueResponse,
   MetricsResponse,
   PlayerFieldResponse,
@@ -20,16 +21,20 @@ export function getProviderStatus(): Promise<ProviderStatusResponse> {
   return request<ProviderStatusResponse>("/health");
 }
 
+export function getDataSources(): Promise<DataSourcesResponse> {
+  return request<DataSourcesResponse>("/api/data-sources");
+}
+
 export function getLeagues(): Promise<LeagueResponse> {
   return request<LeagueResponse>("/api/leagues");
 }
 
-export function getPlayersMetadata(): Promise<PlayerFieldResponse> {
-  return request<PlayerFieldResponse>("/api/players");
+export function getPlayersMetadata(query = ""): Promise<PlayerFieldResponse> {
+  return request<PlayerFieldResponse>(`/api/players${query ? `?${query}` : ""}`);
 }
 
-export function getRankingsMetadata(): Promise<PlayerFieldResponse> {
-  return request<PlayerFieldResponse>("/api/rankings");
+export function getRankingsMetadata(query = ""): Promise<PlayerFieldResponse> {
+  return request<PlayerFieldResponse>(`/api/rankings${query ? `?${query}` : ""}`);
 }
 
 export function getCompareMetadata(playerIds = ""): Promise<CompareResponse> {

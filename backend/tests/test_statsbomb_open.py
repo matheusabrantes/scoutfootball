@@ -1,4 +1,7 @@
 import json
+import sqlite3
+
+import pytest
 
 from app.services.metrics.statsbomb_aggregations import (
     aggregate_player_season,
@@ -8,7 +11,19 @@ from app.services.metrics.statsbomb_aggregations import (
     match_duration_minutes,
     position_group,
 )
+from app.db.schema import initialize_schema
+from app.services.ingestion.statsbomb_players import ingest_statsbomb_player_rows
 from app.services.providers.statsbomb_open import StatsBombOpenDataProvider
+
+
+@pytest.fixture
+def sqlite_connection():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    try:
+        yield connection
+    finally:
+        connection.close()
 
 
 def test_provider_reads_cached_competitions(tmp_path):
@@ -134,6 +149,78 @@ def test_aggregate_player_season_handles_null_aerial_fields():
     assert rows[0]["goals"] == 1
     assert rows[0]["progressive_passes"] == 1
     assert rows[0]["aerial_duels"] is None
+
+
+def test_statsbomb_ingestion_is_idempotent(sqlite_connection):
+    initialize_schema(sqlite_connection)
+    rows = [
+        {
+            "player_id": 1,
+            "player_name": "Forward",
+            "provider_team_id": 10,
+            "team": "Home",
+            "competition": "Premier League",
+            "season": "2015/2016",
+            "position_group": "Attackers",
+            "minutes": 90,
+            "appearances": 1,
+            "starts": 1,
+            "goals": 1,
+            "non_penalty_goals": 1,
+            "assists": 0,
+            "shots": 2,
+            "shots_on_target": 1,
+            "xg": 0.5,
+            "npxg": 0.5,
+            "key_passes": 1,
+            "passes_attempted": 10,
+            "passes_completed": 8,
+            "pass_completion_pct": 80.0,
+            "forward_passes_attempted": 3,
+            "forward_passes_completed": 2,
+            "forward_pass_completion_pct": 66.67,
+            "progressive_passes": 1,
+            "progressive_carries": 1,
+            "crosses": 1,
+            "accurate_crosses": 0,
+            "dribbles_attempted": 1,
+            "successful_dribbles": 1,
+            "touches_in_box": 2,
+            "interceptions": 0,
+            "blocks": 0,
+            "ball_recoveries": 1,
+            "duels": 2,
+            "duels_won": 1,
+            "aerial_duels": None,
+            "aerial_duels_won": None,
+            "saves": 0,
+            "shots_on_target_faced": 0,
+            "save_percentage": None,
+            "goals_conceded": 0,
+            "long_passes_attempted": 1,
+            "long_passes_completed": 1,
+            "long_pass_accuracy": 100.0,
+            "short_passes_attempted": 9,
+            "short_passes_completed": 7,
+            "short_pass_completion": 77.78,
+            "exits": 0,
+            "yellow_cards": 0,
+            "red_cards": 0,
+        }
+    ]
+    quality = {"minute_quality": "estimated", "matches_processed": 1}
+
+    first = ingest_statsbomb_player_rows(sqlite_connection, 2, 27, rows, quality)
+    second = ingest_statsbomb_player_rows(sqlite_connection, 2, 27, rows, quality)
+
+    assert first["inserted"] == 1
+    assert second["updated"] == 1
+    player_rows = sqlite_connection.execute("SELECT COUNT(*) AS count FROM player_season_stats").fetchone()
+    assert player_rows["count"] == 1
+    per_90 = sqlite_connection.execute(
+        "SELECT metric_value FROM player_metric_values WHERE metric_key = 'goals_per_90'"
+    ).fetchone()
+    assert per_90["metric_value"] == 1.0
 
 
 def starting_xi_event(players):

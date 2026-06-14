@@ -81,6 +81,8 @@ Current FBref result from 2026-06-12:
 
 Detailed evaluation lives in `docs/STATSBOMB_OPEN_DATA_EVALUATION.md`.
 
+Product decision: StatsBomb Open Data is now `primary_mvp_metrics_provider` for the `historical_real_data_mvp`.
+
 Current StatsBomb Open Data result from 2026-06-14:
 
 - Provider classification: `viable_as_metric_engine_prototype`.

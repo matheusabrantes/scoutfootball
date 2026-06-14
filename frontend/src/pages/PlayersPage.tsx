@@ -7,10 +7,19 @@ import type { PlayerFieldResponse } from "../types/api";
 export function PlayersPage() {
   const [data, setData] = useState<PlayerFieldResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [positionGroup, setPositionGroup] = useState("");
+  const [minimumMinutes, setMinimumMinutes] = useState("0");
 
   useEffect(() => {
-    getPlayersMetadata().then(setData).catch((requestError: Error) => setError(requestError.message));
-  }, []);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (positionGroup) params.set("position_group", positionGroup);
+    if (minimumMinutes) params.set("minimum_minutes", minimumMinutes);
+    getPlayersMetadata(params.toString())
+      .then(setData)
+      .catch((requestError: Error) => setError(requestError.message));
+  }, [minimumMinutes, positionGroup, search]);
 
   if (error) {
     return <StatusPanel title="Backend unavailable" message={error} tone="warning" />;
@@ -19,12 +28,29 @@ export function PlayersPage() {
   return (
     <section className="page">
       <div className="page__heading">
-        <p className="eyebrow">Real data first</p>
+        <p className="eyebrow">Historical dataset</p>
         <h2>Players</h2>
         <p>
-          This page reads provider validation metadata. It will not silently show fake players when
-          real data is not configured.
+          Real player-season rows calculated from StatsBomb Open Data events. Historical data is not
+          presented as current-season coverage.
         </p>
+      </div>
+      <div className="filter-bar">
+        <input placeholder="Search player" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <select value={positionGroup} onChange={(event) => setPositionGroup(event.target.value)}>
+          <option value="">All positions</option>
+          <option value="Goalkeepers">Goalkeepers</option>
+          <option value="Centrebacks">Centrebacks</option>
+          <option value="Fullbacks">Fullbacks</option>
+          <option value="Midfielders">Midfielders</option>
+          <option value="Attackers">Attackers</option>
+        </select>
+        <select value={minimumMinutes} onChange={(event) => setMinimumMinutes(event.target.value)}>
+          <option value="0">0+ minutes</option>
+          <option value="300">300+ minutes</option>
+          <option value="500">500+ minutes</option>
+          <option value="900">900+ minutes</option>
+        </select>
       </div>
       {!data ? (
         <StatusPanel title="Loading provider state" message="Checking backend data status." />
@@ -40,7 +66,7 @@ export function PlayersPage() {
                 <th>League</th>
                 <th>Position</th>
                 <th>Minutes</th>
-                <th>Rating</th>
+                <th>Source</th>
               </tr>
             </thead>
             <tbody>
@@ -51,7 +77,7 @@ export function PlayersPage() {
                   <td>{player.league_name}</td>
                   <td>{player.position_group}</td>
                   <td>{player.minutes ?? "-"}</td>
-                  <td>{player.rating ?? "-"}</td>
+                  <td>{player.historical_demo ? "Historical StatsBomb" : player.provider ?? "-"}</td>
                 </tr>
               ))}
             </tbody>

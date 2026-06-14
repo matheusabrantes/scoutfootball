@@ -13,7 +13,7 @@ from app.services.metrics.percentiles import calculate_percentiles  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Calculate ScoutFootball MVP percentiles.")
-    parser.add_argument("--minimum-minutes", type=int, default=500)
+    parser.add_argument("--minimum-minutes", type=int, default=900)
     parser.add_argument("--minimum-peer-count", type=int, default=5)
     return parser.parse_args()
 

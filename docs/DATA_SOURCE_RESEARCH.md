@@ -4,7 +4,9 @@ Research snapshot: 2026-06-12
 
 Latest deep research: `docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md` was added on 2026-06-14. It recommends a static/hybrid MVP: vetted FBref-style Kaggle/CSV datasets for top-five European advanced metrics, API-Football for metadata and South America basic context, and no live scraping or private endpoint use.
 
-StatsBomb Open Data evaluation: `docs/STATSBOMB_OPEN_DATA_EVALUATION.md` was added on 2026-06-14. It classifies StatsBomb Open Data as `viable_as_metric_engine_prototype`: useful for event-level metric logic and historical demos, but not current-season or full target-league ScoutFootball coverage.
+StatsBomb Open Data evaluation: `docs/STATSBOMB_OPEN_DATA_EVALUATION.md` was added on 2026-06-14. After the product decision update, StatsBomb Open Data is the official primary MVP metrics provider for selected historical datasets; it is still not current-season or full target-league coverage.
+
+Product decision update: StatsBomb Open Data is now the official `primary_mvp_metrics_provider` for a `historical_real_data_mvp`. The first release accepts historical coverage and does not claim current-season availability.
 
 ## Executive Summary
 

@@ -1,4 +1,6 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, Optional
 
 from fastapi import APIRouter, Query
 
@@ -11,10 +13,11 @@ router = APIRouter(prefix="/api/rankings", tags=["rankings"])
 @router.get("")
 def rankings(
     metric: str = "minutes",
-    league: str | None = None,
-    season: int | None = None,
-    team: str | None = None,
-    position_group: str | None = None,
+    league: Optional[str] = None,
+    competition: Optional[str] = None,
+    season: Optional[int] = None,
+    team: Optional[str] = None,
+    position_group: Optional[str] = None,
     minimum_minutes: int = 0,
     sort: str = "metric_value",
     limit: int = Query(default=100, le=500),
@@ -24,9 +27,10 @@ def rankings(
         "COALESCE(player_season_stats.minutes, 0) >= ?",
     ]
     params: list[Any] = [metric, minimum_minutes]
-    if league:
+    league_filter = competition or league
+    if league_filter:
         filters.append("leagues.internal_key = ?")
-        params.append(league)
+        params.append(league_filter)
     if season:
         filters.append("seasons.year = ?")
         params.append(season)
@@ -57,7 +61,13 @@ def rankings(
                 player_metric_values.metric_key,
                 player_metric_values.metric_value,
                 player_metric_values.percentile,
-                player_metric_values.peer_count
+                player_metric_values.peer_count,
+                player_metric_values.population_size,
+                player_metric_values.minutes_threshold,
+                player_season_stats.provider,
+                player_season_stats.historical_demo,
+                player_season_stats.metric_definition_version,
+                player_season_stats.last_updated_at
             FROM player_metric_values
             JOIN player_season_stats ON player_season_stats.id = player_metric_values.player_season_stats_id
             JOIN players ON players.id = player_season_stats.player_id
@@ -80,6 +90,22 @@ def rankings(
     return {
         "data_source": "sqlite",
         "mock": False,
-        "metric": metric,
-        "rankings": rankings_rows,
-    }
+            "metric": metric,
+            "rankings": rankings_rows,
+            "metadata": {
+                "source": "statsbomb_open",
+                "historical_demo": any(row.get("historical_demo") for row in rankings_rows),
+                "metric_definition_version": next(
+                    (
+                        row.get("metric_definition_version")
+                        for row in rankings_rows
+                        if row.get("metric_definition_version")
+                    ),
+                    None,
+                ),
+                "last_updated_at": next(
+                    (row.get("last_updated_at") for row in rankings_rows if row.get("last_updated_at")),
+                    None,
+                ),
+            },
+        }

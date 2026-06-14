@@ -53,10 +53,18 @@ def calculate_percentiles(
         connection.execute(
             """
             UPDATE player_metric_values
-            SET percentile = ?, peer_count = ?, calculation_version = ?
+            SET percentile = ?, peer_count = ?, population_size = ?, minutes_threshold = ?,
+                calculation_version = ?
             WHERE id = ?
             """,
-            (percentile, len(peer_values), f"mvp_v1_min_{minimum_minutes}", row["id"]),
+            (
+                percentile,
+                len(peer_values),
+                len(peer_values),
+                minimum_minutes,
+                f"mvp_v1_min_{minimum_minutes}",
+                row["id"],
+            ),
         )
         updated += 1
     connection.commit()

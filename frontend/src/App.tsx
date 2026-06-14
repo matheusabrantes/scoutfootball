@@ -8,8 +8,8 @@ import { LeaguesPage } from "./pages/LeaguesPage";
 import { MethodologyPage } from "./pages/MethodologyPage";
 import { PlayersPage } from "./pages/PlayersPage";
 import { RankingsPage } from "./pages/RankingsPage";
-import { getProviderStatus } from "./lib/api";
-import type { ProviderStatusResponse } from "./types/api";
+import { getDataSources } from "./lib/api";
+import type { DataSourcesResponse } from "./types/api";
 
 function renderPage(page: string, onNavigate: (page: string) => void) {
   if (page === "players") return <PlayersPage />;
@@ -22,10 +22,10 @@ function renderPage(page: string, onNavigate: (page: string) => void) {
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [providerStatus, setProviderStatus] = useState<ProviderStatusResponse | null>(null);
+  const [dataSources, setDataSources] = useState<DataSourcesResponse | null>(null);
 
   useEffect(() => {
-    getProviderStatus().then(setProviderStatus).catch(() => setProviderStatus(null));
+    getDataSources().then(setDataSources).catch(() => setDataSources(null));
   }, []);
 
   return (
@@ -34,15 +34,14 @@ export default function App() {
         <StatusPanel
           title="Provider status"
           message={
-            providerStatus?.providers?.api_football_configured
-              ? "API-Football key is configured."
-              : "API-Football key is not configured. Real data validation is required."
+            dataSources
+              ? "Historical real-data MVP powered by StatsBomb Open Data."
+              : "StatsBomb data source not loaded yet."
           }
-          tone={providerStatus?.providers?.api_football_configured ? "success" : "warning"}
+          tone={dataSources ? "success" : "warning"}
         />
       </div>
       {renderPage(page, setPage)}
     </Shell>
   );
 }
-

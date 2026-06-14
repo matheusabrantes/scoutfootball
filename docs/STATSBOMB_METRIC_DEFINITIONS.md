@@ -81,3 +81,63 @@ Known limitations:
 - Red-card and substitution logic is event-feed dependent.
 - Players with missing Starting XI/substitution data may have incomplete minutes.
 - The algorithm is suitable for a proof of concept, but should be reconciled against official minutes before public rankings.
+
+## Derived Metric Inventory
+
+| Metric | Event Types Used | Fields Used | Formula | Exclusions | Known Limitations |
+| --- | --- | --- | --- | --- | --- |
+| goals | `Shot` | `shot.outcome.name` | Count shots where outcome is `Goal` | Own goals are not included as player goals | Depends on event tagging |
+| non_penalty_goals | `Shot` | `shot.outcome.name`, `shot.type.name` | Goals where shot type is not `Penalty` | Penalties | None for tagged shots |
+| assists | `Pass` | `pass.goal_assist` | Count passes with goal-assist flag | Does not include fantasy assists | StatsBomb definition only |
+| shots | `Shot` | event type | Count shot events | None | Includes penalties unless filtered elsewhere |
+| shots_on_target | `Shot` | `shot.outcome.name` | Count `Goal`, `Saved`, `Saved to Post`, `Saved Off Target`, `Post` | Blocked/off-target outcomes | Approximation of on-target taxonomy |
+| xg | `Shot` | `shot.statsbomb_xg` | Sum shot xG | None | StatsBomb model, not FBref/DataMB |
+| npxg | `Shot` | `shot.statsbomb_xg`, `shot.type.name` | Sum xG excluding penalties | Penalties | StatsBomb model |
+| key_passes | `Pass` | `pass.shot_assist` | Count shot-assist passes | Goal assists also counted only if shot-assist flag exists | Direct xA not available |
+| passes_attempted | `Pass` | event type | Count pass events | None | Includes all tagged pass types |
+| passes_completed | `Pass` | `pass.outcome` | Count passes with no outcome | Incomplete/out/unknown outcomes | StatsBomb uses missing outcome for completed passes |
+| pass_completion_pct | `Pass` | pass totals | `passes_completed / passes_attempted * 100` | None | Not per 90 |
+| forward_passes_attempted | `Pass` | `location`, `pass.end_location` | Count passes where end x is greater than start x | Missing locations | Simple x-axis rule |
+| forward_passes_completed | `Pass` | `location`, `pass.end_location`, `pass.outcome` | Forward passes with no outcome | Missing locations, incomplete passes | Simple x-axis rule |
+| forward_pass_completion_pct | `Pass` | forward pass totals | `forward_passes_completed / forward_passes_attempted * 100` | None | Not per 90 |
+| crosses | `Pass` | `pass.cross` | Count passes marked as crosses | None | StatsBomb cross flag |
+| accurate_crosses | `Pass` | `pass.cross`, `pass.outcome` | Crosses with no outcome | Incomplete crosses | StatsBomb completion semantics |
+| dribbles_attempted | `Dribble` | event type | Count dribble events | None | Does not include carries |
+| successful_dribbles | `Dribble` | `dribble.outcome.name` | Count outcome `Complete` | Incomplete dribbles | StatsBomb dribble taxonomy |
+| touches_in_box | Any player event | `location` | Count player events in `x >= 102` and `18 <= y <= 62` | Events without location | Event-touch approximation |
+| interceptions | `Interception` | event type | Count interception events | None | None |
+| blocks | `Block` | event type | Count block events | None | None |
+| ball_recoveries | `Ball Recovery` | event type | Count ball recovery events | None | None |
+| duels | `Duel` | event type | Count duel events | None | Does not include every aerial contest |
+| duels_won | `Duel` | `duel.outcome.name` | Count success/won outcomes | Lost/unknown outcomes | Outcome mapping should be audited per season |
+| aerial_duels | Mixed | `pass.aerial_won`, `shot.aerial_won`, `clearance.aerial_won` | Initial MVP stores null | None | Complete denominator not validated |
+| saves | `Goal Keeper` | `goalkeeper.type.name`, `goalkeeper.outcome.name` | Count saved/success outcomes | Non-shot keeper actions | Requires deeper goalkeeper audit |
+| shots_on_target_faced | `Goal Keeper` | `goalkeeper.type.name` | Count shot-faced/save keeper events | Non-shot actions | May need reconciliation against shots |
+| save_percentage | `Goal Keeper` | saves, shots on target faced | `saves / shots_on_target_faced * 100` | None | Partially reliable until audited |
+| goals_conceded | `Goal Keeper` | `goalkeeper.type.name`, `goalkeeper.outcome.name` | Count shot-faced goal-conceded outcomes | Own goals/team goals not fully handled | Needs reconciliation |
+| long_pass_accuracy | `Pass` | `pass.length`, `pass.outcome` | Completed passes with length >= 30 / attempted length >= 30 | Missing length | Custom threshold |
+| short_pass_completion | `Pass` | `pass.length`, `pass.outcome` | Completed passes with length < 30 / attempted length < 30 | Missing length | Custom threshold |
+| exits | `Goal Keeper` | `goalkeeper.type.name` | Count `Collected`, `Keeper Sweeper`, `Punch` | Other keeper actions | Custom grouping |
+
+## Per-90 Metrics
+
+For count metrics, ScoutFootball stores an additional metric with the suffix `_per_90`:
+
+```text
+metric_per_90 = metric_total / minutes * 90
+```
+
+Per-90 values are only calculated when `minutes > 0`.
+
+Percentages and completion rates are not converted to per-90 values.
+
+## Not Available In Initial MVP
+
+The following placeholders are stored as null until formulas and required data are validated:
+
+- `direct_xa`
+- `psxg`
+- `psxg_minus_goals_allowed`
+- `interceptions_padj`
+- `tackles_padj`
+- `possession_won_padj`

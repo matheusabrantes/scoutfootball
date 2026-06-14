@@ -10,6 +10,18 @@ GitHub repository: [https://github.com/matheusabrantes/scoutfootball.git](https:
 
 Tagline: "Find better players through clearer football data."
 
+## MVP Direction Update — 2026-06-14
+
+The official MVP is now a `historical_real_data_mvp`.
+
+- Primary metrics provider: `statsbomb_open`.
+- First release uses historical StatsBomb Open Data, not current-season coverage.
+- Metrics are calculated by ScoutFootball from event data.
+- API-Football remains optional metadata fallback only.
+- Static CSV/Kaggle support can remain available but is not the main implementation priority.
+- All UI and docs must clearly label historical datasets.
+- StatsBomb attribution is required before public deployment.
+
 ## Target Users
 
 - Recruitment analysts who need quick player shortlists.
@@ -22,8 +34,8 @@ Tagline: "Find better players through clearer football data."
 ### In Scope
 
 - Player-only analytics.
-- Current season and last completed season.
-- Selected leagues in Europe and South America.
+- Historical StatsBomb Open Data competitions and seasons.
+- Selected complete or useful historical competitions, starting with Premier League 2015/2016.
 - Player search.
 - Player database with filters.
 - Player profile pages.

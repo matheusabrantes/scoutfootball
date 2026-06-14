@@ -93,6 +93,19 @@ Optional `soccerdata` provider dependency.
 Notes:
 Completed as far as allowed by access controls on 2026-06-12. `soccerdata 1.8.8` installed in local `backend/.venv`, but FBref returned `403 Forbidden` for `https://fbref.com/en/comps/` before table inspection. The script now fails fast on blocked access and records safe metadata only. Do not bypass access controls. API-Football remains metadata/basic fallback only; advanced metrics need a licensed provider or vetted bootstrap dataset.
 
+### Validate static CSV data sources
+
+Priority: P0
+Area: Data
+Description:
+Evaluate vetted Kaggle/FBref-style static CSV datasets for top-five European player metrics and define a safe manual upload workflow with source provenance.
+Acceptance Criteria:
+At least one candidate dataset has documented URL, license, seasons, leagues, row count, column list, metric mapping, and allowed local use; unsupported metrics are marked unavailable; no live scraping or private endpoint ingestion is implemented.
+Dependencies:
+`docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md`.
+Notes:
+Recommended next data task from 2026-06-14 deep research. Start with Kaggle top-five Europe 2024-2025 and FBref 2017-2024 datasets. Keep API-Football as metadata/basic fallback for Brazil and Argentina.
+
 ### Create backend scaffold
 
 Priority: P0

@@ -144,3 +144,14 @@ Current state:
 - Current strategy classification is `not_viable_without_paid_provider`.
 - API-Football should remain as metadata/basic fallback.
 - Advanced MVP metrics still require a licensed provider, a different acceptable source, or a vetted bootstrap dataset.
+
+## Deep Research Update
+
+Deep source research on 2026-06-14 is documented in `docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md`.
+
+MVP metric strategy:
+
+- Top-five Europe: use vetted FBref-style Kaggle/static CSVs first, with metric support determined by actual columns.
+- Brazil and Argentina: keep API-Football metadata/basic context only until a legitimate advanced dataset or paid provider is validated.
+- Do not show unsupported advanced metrics as real values.
+- Do not implement live scraping or private/unofficial endpoint ingestion.

@@ -2,6 +2,8 @@
 
 Research snapshot: 2026-06-12
 
+Latest deep research: `docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md` was added on 2026-06-14. It recommends a static/hybrid MVP: vetted FBref-style Kaggle/CSV datasets for top-five European advanced metrics, API-Football for metadata and South America basic context, and no live scraping or private endpoint use.
+
 ## Executive Summary
 
 ScoutFootball should not ingest, scrape, mirror, or infer data from DataMB. Public inspection of DataMB shows league, club, player, radar, plot, and guide functionality, but I did not find a public statement that identifies its underlying provider. The available metric mix resembles event-data products such as Wyscout, Opta/Stats Perform, StatsBomb-style feeds, or derived FBref-style tables, but that is an inference, not a confirmed source.

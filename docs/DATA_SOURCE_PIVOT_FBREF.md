@@ -66,6 +66,18 @@ Decision:
 - Keep API-Football as metadata/basic fallback.
 - For reliable advanced player metrics, use a paid/licensed provider or a vetted bootstrap dataset with documented provenance.
 
+## Low-Cost Source Research Update — 2026-06-14
+
+See `docs/FOOTBALL_DATA_SOURCE_DEEP_RESEARCH.md`.
+
+Updated recommendation:
+
+- Do not continue toward live FBref scraping.
+- Use vetted FBref-style Kaggle/static CSV datasets as the first advanced-metric source for top-five Europe.
+- Keep API-Football as metadata/basic fallback, especially for Brazil and Argentina.
+- Treat Brazil/Argentina advanced metrics as blocked unless a legitimate CSV or low-cost provider is validated.
+- Validate TheStatsAPI only if a paid API is acceptable; it is the best low-cost API lead found, but still unverified locally.
+
 ## Decision Framework
 
 Classify the data strategy as one of:

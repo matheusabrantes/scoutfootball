@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      SCOUTFOOTBALL_ENV: development
+      DATABASE_URL: sqlite:///backend/data/scoutfootball.db
+      STATSBOMB_DATA_DIR: backend/data_sources/statsbomb_open
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+    ports:
+      - "8000:8000"
+    volumes:
+      - scoutfootball_backend_data:/app/backend/data
+      - scoutfootball_statsbomb_data:/app/backend/data_sources
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  scoutfootball_backend_data:
+  scoutfootball_statsbomb_data:

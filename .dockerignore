@@ -1,0 +1,17 @@
+.env
+.DS_Store
+.git
+.venv
+backend/.venv
+backend/.pytest_cache
+backend/.ruff_cache
+backend/data
+backend/data_sources
+backend/data_samples/**/*.json
+backend/data_samples/**/*.csv
+backend/data_samples/**/*.parquet
+backend/*.egg-info
+frontend/node_modules
+frontend/dist
+**/__pycache__
+*.pyc
